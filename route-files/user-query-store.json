@@ -1,0 +1,12 @@
+[
+	{
+		"path": "/mws/v1/user-query-store",
+		"class": "MWStake\\MediaWiki\\Component\\CommonWebAPIs\\Rest\\UserQueryStore",
+		"services": [
+			"DBLoadBalancer",
+			"UserFactory",
+			"LinkRenderer",
+			"TitleFactory"
+		]
+	}
+]

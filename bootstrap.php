@@ -6,5 +6,8 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 
 define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '1.0.0' );
 
-$GLOBALS['wgExtensionFunctions'][]
-	= "\\MWStake\\MediaWiki\\Component\\CommonWebAPIs\\Setup::onExtensionFunctions";
+MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
+	->register( 'commonwebapis', function () {
+		$GLOBALS['wgExtensionFunctions'][]
+			= "\\MWStake\\MediaWiki\\Component\\CommonWebAPIs\\Setup::onExtensionFunctions";
+	} );

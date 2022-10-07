@@ -7,8 +7,8 @@ use ExtensionRegistry;
 class Setup {
 
 	public function onExtensionFunctions() {
-		$extensionRegistry = ExtensionRegistry::getInstance();
-		$requiredEndpoints = $extensionRegistry->getAttribute( 'MWStakeCommonWebAPIs' );
+		/*$extensionRegistry = ExtensionRegistry::getInstance();
+		$requiredEndpoints = $extensionRegistry->getAttribute( 'MWStakeCommonWebAPIs' );*/
 
 		$availableEndPoints = [
 			'async-menu',
@@ -22,10 +22,14 @@ class Setup {
 
 		$routeFilesDir = dirname( __DIR__ ) . '/route-files/';
 		foreach ( $availableEndPoints as $availableEndPoint ) {
-			if ( in_array( $availableEndPoint, $requiredEndpoints ) ) {
-				$GLOBALS['wgRestAPIAdditionalRouteFiles'][]
-					= $routeFilesDir . "$availableEndPoint.json";
-			}
+			//if ( in_array( $availableEndPoint, $requiredEndpoints ) ) {
+				$file = $routeFilesDir . "$availableEndPoint.json";
+				if ( !is_readable( $file ) ) {
+					continue;
+				}
+				$file = str_replace( $GLOBALS['IP'], '', $file );
+				$GLOBALS['wgRestAPIAdditionalRouteFiles'][] = $file;
+			//}
 		}
 	}
 }
