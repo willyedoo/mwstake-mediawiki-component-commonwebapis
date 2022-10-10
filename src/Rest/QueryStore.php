@@ -3,6 +3,7 @@
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Rest;
 
 use Elastica\Param;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\Response;
 use MediaWiki\Rest\ResponseFactory;
@@ -13,6 +14,12 @@ use MWStake\MediaWiki\Component\DataStore\ResultSet;
 use Wikimedia\ParamValidator\ParamValidator;
 
 abstract class QueryStore extends Handler {
+	private $hookContainer;
+
+	public function __construct( HookContainer $hookContainer ) {
+		$this->hookContainer = $hookContainer;
+	}
+
 	public function needsReadAccess() {
 		return true;
 	}
@@ -35,6 +42,7 @@ abstract class QueryStore extends Handler {
 
 	protected function getReaderParams(): ReaderParams {
 		return new ReaderParams( [
+			'query' => $this->getQuery(),
 			'start' => $this->getOffset(),
 			'limit' => $this->getLimit(),
 			'filter' => $this->getFilter(),
@@ -47,13 +55,13 @@ abstract class QueryStore extends Handler {
 	}
 
 	protected function returnResult( ResultSet $result ): Response {
+		$this->hookContainer->run( 'CommonWebAPIs::QueryStoreResult', [ $this, &$result ] );
 		$contentType = $contentType ?? 'application/json';
 		$response = new Response( $this->encodeJson( [
 			'results' => $result->getRecords(),
 			'total' => $result->getTotal(),
 		] ) );
 		$response->setHeader( 'Content-Type', $contentType );
-
 		return $response;
 	}
 
@@ -90,7 +98,13 @@ abstract class QueryStore extends Handler {
 				ParamValidator::PARAM_REQUIRED => false,
 				ParamValidator::PARAM_TYPE => [ 'json', 'jsonfm' ],
 				ParamValidator::PARAM_DEFAULT => 'json'
-			]
+			],
+			'query' => [
+				static::PARAM_SOURCE => 'query',
+				ParamValidator::PARAM_REQUIRED => false,
+				ParamValidator::PARAM_DEFAULT => '',
+				ParamValidator::PARAM_TYPE => 'string',
+			],
 		], $this->getStoreSpecificParams() );
 	}
 
@@ -132,5 +146,9 @@ abstract class QueryStore extends Handler {
 
 	private function getFormat(): string {
 		return $this->getValidatedParams()['format'];
+	}
+
+	private function getQuery(): string {
+		return $this->getValidatedParams()['query'];
 	}
 }

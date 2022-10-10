@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Rest;
 
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\User\UserFactory;
 use MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore\Store;
@@ -19,24 +20,14 @@ class UserQueryStore extends QueryStore {
 	 * @param \TitleFactory $titleFactory
 	 */
 	public function __construct(
-		ILoadBalancer $lb, UserFactory $userFactory,
+		HookContainer $hookContainer, ILoadBalancer $lb, UserFactory $userFactory,
 		LinkRenderer $linkRenderer, \TitleFactory $titleFactory
 	) {
+		parent::__construct( $hookContainer );
 		$this->store = new Store( $lb, $userFactory, $linkRenderer, $titleFactory );
 	}
 
 	protected function getStore() : IStore {
 		return $this->store;
-	}
-
-	public function getStoreSpecificParams() : array {
-		return [
-			'query' => [
-				static::PARAM_SOURCE => 'query',
-				ParamValidator::PARAM_REQUIRED => false,
-				ParamValidator::PARAM_DEFAULT => '',
-				ParamValidator::PARAM_TYPE => 'string',
-			]
-		];
 	}
 }

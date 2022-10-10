@@ -16,4 +16,5 @@ class UserRecord extends Record {
 	public const DISPLAY_HTML = 'display_html';
 	public const PAGE_LINK = 'page_link';
 	public const PAGE_PREFIXED_TEXT = 'page_prefixed_text';
+	public const USER_IMAGE = 'user_image';
 }

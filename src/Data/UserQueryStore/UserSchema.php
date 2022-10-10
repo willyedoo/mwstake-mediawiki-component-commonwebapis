@@ -58,6 +58,11 @@ class UserSchema extends Schema {
 				self::SORTABLE => false ,
 				self::TYPE => FieldType::STRING
 			],
+			UserRecord::USER_IMAGE => [
+				self::FILTERABLE => false,
+				self::SORTABLE => false ,
+				self::TYPE => FieldType::STRING
+			]
 		]  );
 	}
 }
