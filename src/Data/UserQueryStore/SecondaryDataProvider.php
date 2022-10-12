@@ -32,14 +32,16 @@ class SecondaryDataProvider implements ISecondaryDataProvider {
 	 */
 	public function extend( $dataSets ) {
 		foreach ( $dataSets as $dataSet ) {
-			$userPage = $this->titleFactory->makeTitle( NS_USER, $dataSet->get( 'user_name' ) );
+			$user = $this->userFactory->newFromId( $dataSet->get( UserRecord::ID ) );
+			$userPage = $user->getUserPage();
 			$userPageLink = $this->linkRenderer->makeLink(
 				$userPage,
 				// The whitespace is to aviod automatic rewrite to user_real_name by BSF
-				$dataSet->get( 'user_name' ) . ' '
+				$dataSet->get( 'display_name' ) . ' '
 			);
-			$dataSet->set( 'user_page_link', $userPageLink );
-			$dataSet->set( 'page_prefixed_text', $userPage->getPrefixedText() );
+			$dataSet->set( UserRecord::PAGE_LINK, $userPageLink );
+			$dataSet->set( UserRecord::PAGE_URL, $userPage->getLocalURL() );
+			$dataSet->set( UserRecord::PAGE_PREFIXED_TEXT, $userPage->getPrefixedText() );
 		}
 
 		return $dataSets;
