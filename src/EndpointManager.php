@@ -1,0 +1,64 @@
+<?php
+
+namespace MWStake\MediaWiki\Component\CommonWebAPIs;
+
+class EndpointManager {
+	/** @var array|null */
+	private $available = null;
+
+	/**
+	 * @return array
+	 */
+	public function getAvailableEndpoints(): array {
+		$this->assertLoaded();
+		return $this->available;
+	}
+
+	/**
+	 * Add all route files to $wgRestAPIAdditionalRouteFiles
+	 *
+	 * @return void
+	 */
+	public function enableEndpoints() {
+		$routeFilesDir = dirname( __DIR__ ) . '/route-files/';
+		foreach ( $this->getRoutes() as $file => $path ) {
+			if ( !is_readable( $path ) ) {
+				continue;
+			}
+			$relative = str_replace( $GLOBALS['IP'], '', $path );
+			$GLOBALS['wgRestAPIAdditionalRouteFiles'][] = $relative;
+		}
+	}
+
+	private function assertLoaded() {
+		if ( $this->available === null ) {
+			$this->available = [];
+			foreach ( $this->getRoutes() as $file => $path ) {
+				// Strip extension from $file
+				$endpointKey = substr( $file, 0, strrpos( $file, '.' ) );
+				$endpoint = json_decode( file_get_contents( $path ), 1 );
+				if ( !is_array( $endpoint ) ) {
+					continue;
+				}
+				$this->available[$endpointKey] = $endpoint;
+			}
+		}
+	}
+
+
+	/**
+	 * @return array
+	 */
+	private function getRoutes(): array {
+		$routes = [];
+		$routesDir = dirname( __DIR__ ) . '/route-files';
+		$files = scandir( $routesDir );
+		foreach ( $files as $file ) {
+			if ( $file === '.' || $file === '..' ) {
+				continue;
+			}
+			$routes[$file] = $routesDir . '/' . $file;
+		}
+		return $routes;
+	}
+}

@@ -2,19 +2,34 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\User\UserFactory;
 use MWStake\MediaWiki\Component\DataStore\ISecondaryDataProvider;
 
 class SecondaryDataProvider implements ISecondaryDataProvider {
+	/** @var UserFactory */
 	private $userFactory;
+	/** @var LinkRenderer */
 	private $linkRenderer;
+	/** @var \TitleFactory */
 	private $titleFactory;
 
+	/**
+	 * @param UserFactory $userFactory
+	 * @param LinkRenderer $linkRenderer
+	 * @param \TitleFactory $titleFactory
+	 */
 	public function __construct( $userFactory, $linkRenderer, $titleFactory ) {
 		$this->userFactory = $userFactory;
 		$this->linkRenderer = $linkRenderer;
 		$this->titleFactory = $titleFactory;
 	}
 
+	/**
+	 * @params array $dataSets
+	 *
+	 * @return \MWStake\MediaWiki\Component\DataStore\Record[]
+	 */
 	public function extend( $dataSets ) {
 		foreach ( $dataSets as $dataSet ) {
 			$userPage = $this->titleFactory->makeTitle( NS_USER, $dataSet->get( 'user_name' ) );

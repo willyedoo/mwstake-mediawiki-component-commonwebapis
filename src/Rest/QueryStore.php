@@ -14,32 +14,54 @@ use MWStake\MediaWiki\Component\DataStore\ResultSet;
 use Wikimedia\ParamValidator\ParamValidator;
 
 abstract class QueryStore extends Handler {
+	/** @var HookContainer */
 	private $hookContainer;
 
+	/**
+	 * @param HookContainer $hookContainer
+	 */
 	public function __construct( HookContainer $hookContainer ) {
 		$this->hookContainer = $hookContainer;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function needsReadAccess() {
 		return true;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function needsWriteAccess() {
 		return false;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$store = $this->getStore();
 		$readerParams = $this->getReaderParams();
 		return $this->returnResult( $this->getResult( $store, $readerParams ) );
 	}
 
+	/**
+	 * @return IStore
+	 */
 	abstract protected function getStore(): IStore;
 
+	/**
+	 * @return array
+	 */
 	protected function getStoreSpecificParams(): array {
 		return [];
 	}
 
+	/**
+	 * @return ReaderParams
+	 */
 	protected function getReaderParams(): ReaderParams {
 		return new ReaderParams( [
 			'query' => $this->getQuery(),
@@ -50,10 +72,21 @@ abstract class QueryStore extends Handler {
 		] );
 	}
 
+	/**
+	 * @param IStore $store
+	 * @param ReaderParams $readerParams
+	 *
+	 * @return ResultSet
+	 */
 	protected function getResult( IStore $store, ReaderParams $readerParams ): ResultSet {
 		return $store->getReader()->read( $readerParams );
 	}
 
+	/**
+	 * @param ResultSet $result
+	 *
+	 * @return Response
+	 */
 	protected function returnResult( ResultSet $result ): Response {
 		$this->hookContainer->run( 'CommonWebAPIs::QueryStoreResult', [ $this, &$result ] );
 		$contentType = $contentType ?? 'application/json';
@@ -65,10 +98,18 @@ abstract class QueryStore extends Handler {
 		return $response;
 	}
 
+	/**
+	 * @param array $data
+	 *
+	 * @return false|string
+	 */
 	private function encodeJson( $data ) {
 		return json_encode( $data, $this->getFormat() === 'jsonfm' ? JSON_PRETTY_PRINT : 0 );
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getParamSettings() {
 		return array_merge( [
 			'sort' => [
@@ -144,10 +185,16 @@ abstract class QueryStore extends Handler {
 		return [];
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getFormat(): string {
 		return $this->getValidatedParams()['format'];
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getQuery(): string {
 		return $this->getValidatedParams()['query'];
 	}

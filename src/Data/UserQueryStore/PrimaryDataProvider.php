@@ -9,9 +9,14 @@ use MWStake\MediaWiki\Component\DataStore\Schema;
 use Wikimedia\Rdbms\IDatabase;
 
 class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
+	/** @var array */
 	private $groups = [];
+	/** @var array */
 	private $blocks = [];
 
+	/**
+	 * @inheritDoc
+	 */
 	public function makeData( $params ) {
 		$this->getSupportingData( $params );
 		return parent::makeData( $params );
@@ -22,6 +27,9 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		$this->blocks = $this->getBlocks();
 	}
 
+	/**
+	 * @return array
+	 */
 	private function getGroups() {
 		$res = $this->db->select(
 			'user_groups',
@@ -36,6 +44,9 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		return $groups;
 	}
 
+	/**
+	 * @return array
+	 */
 	private function getBlocks() {
 		$blocks = [];
 		$blocksRes = $this->db->select( 'ipblocks', '*', '', __METHOD__ );
@@ -46,6 +57,11 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		return $blocks;
 	}
 
+	/**
+	 * @param ReaderParams $params
+	 *
+	 * @return array
+	 */
 	protected function makePreFilterConds( ReaderParams $params ) {
 		$conds = parent::makePreFilterConds( $params );
 		$query = $params->getQuery();
@@ -62,6 +78,11 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		return $conds;
 	}
 
+	/**
+	 * @param \stdClass $row
+	 *
+	 * @return void
+	 */
 	protected function appendRowToData( \stdClass $row ) {
 		$resultRow = [
 			'user_id' => (int)$row->user_id,
@@ -77,6 +98,9 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		$this->data[] = new UserRecord( (object)$resultRow );
 	}
 
+	/**
+	 * @return string[]
+	 */
 	protected function getTableNames() {
 		return [ 'user' ];
 	}

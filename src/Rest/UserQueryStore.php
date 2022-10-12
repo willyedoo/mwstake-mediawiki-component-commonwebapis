@@ -11,9 +11,11 @@ use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class UserQueryStore extends QueryStore {
+	/** @var Store */
 	private $store;
 
 	/**
+	 * @param HookContainer $hookContainer
 	 * @param ILoadBalancer $lb
 	 * @param UserFactory $userFactory
 	 * @param LinkRenderer $linkRenderer
@@ -27,6 +29,9 @@ class UserQueryStore extends QueryStore {
 		$this->store = new Store( $lb, $userFactory, $linkRenderer, $titleFactory );
 	}
 
+	/**
+	 * @return IStore
+	 */
 	protected function getStore() : IStore {
 		return $this->store;
 	}

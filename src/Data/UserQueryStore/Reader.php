@@ -5,6 +5,7 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\User\UserFactory;
 use MWStake\MediaWiki\Component\DataStore\IReader;
+use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\LoadBalancer;
 
@@ -35,17 +36,30 @@ class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 		$this->titleFactory = $titleFactory;
 	}
 
+	/**
+	 * @return UserSchema
+	 */
 	public function getSchema() {
 		return new UserSchema();
 	}
 
+	/**
+	 * @param ReaderParams $params
+	 *
+	 * @return PrimaryDataProvider
+	 */
 	public function makePrimaryDataProvider( $params ) {
 		return new PrimaryDataProvider(
 			$this->lb->getConnection( DB_REPLICA ), $this->getSchema()
 		);
 	}
 
+	/**
+	 * @return SecondaryDataProvider
+	 */
 	public function makeSecondaryDataProvider() {
-		return new SecondaryDataProvider( $this->userFactory, $this->linkRenderer, $this->titleFactory );
+		return new SecondaryDataProvider(
+			$this->userFactory, $this->linkRenderer, $this->titleFactory
+		);
 	}
 }

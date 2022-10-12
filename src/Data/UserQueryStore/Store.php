@@ -33,14 +33,23 @@ class Store implements IStore {
 		$this->titleFactory = $titleFactory;
 	}
 
+	/**
+	 * @return UserSchema
+	 */
 	public function getSchema() {
 		return new UserSchema();
 	}
 
+	/**
+	 * @return PrimaryDataProvider
+	 */
 	public function getReader() {
 		return new Reader( $this->lb, $this->userFactory, $this->linkRenderer, $this->titleFactory );
 	}
 
+	/**
+	 * @return PrimaryDataProvider
+	 */
 	public function getWriter() {
 		throw new NotImplementedException();
 	}
