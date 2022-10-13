@@ -22,6 +22,10 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		return parent::makeData( $params );
 	}
 
+	/**
+	 * Get supporting data for the user records
+	 * @return void
+	 */
 	private function getSupportingData() {
 		$this->groups = $this->getGroups();
 		$this->blocks = $this->getBlocks();
@@ -68,8 +72,12 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		if ( $query !== '' ) {
 			$conds[] = $this->db->makeList(
 				[
-					'user_name ' . $this->db->buildLike( $this->db->anyString(), $query, $this->db->anyString() ),
-					'user_real_name ' . $this->db->buildLike( $this->db->anyString(), $query, $this->db->anyString() )
+					'user_name ' . $this->db->buildLike(
+						$this->db->anyString(), $query, $this->db->anyString()
+					),
+					'user_real_name ' . $this->db->buildLike(
+						$this->db->anyString(), $query, $this->db->anyString()
+					)
 				],
 				LIST_OR
 			);

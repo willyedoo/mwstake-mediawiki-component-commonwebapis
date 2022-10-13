@@ -88,7 +88,7 @@ abstract class QueryStore extends Handler {
 	 * @return Response
 	 */
 	protected function returnResult( ResultSet $result ): Response {
-		$this->hookContainer->run( 'CommonWebAPIs::QueryStoreResult', [ $this, &$result ] );
+		$this->hookContainer->run( 'MWStakeCommonWebAPIsQueryStoreResult', [ $this, &$result ] );
 		$contentType = $contentType ?? 'application/json';
 		$response = new Response( $this->encodeJson( [
 			'results' => $result->getRecords(),

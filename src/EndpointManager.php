@@ -5,6 +5,15 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 class EndpointManager {
 	/** @var array|null */
 	private $available = null;
+	/** @var string */
+	private $routeFilesDir;
+
+	/**
+	 * @param string $routeFilesDir
+	 */
+	public function __construct( string $routeFilesDir ) {
+		$this->routeFilesDir = $routeFilesDir;
+	}
 
 	/**
 	 * @return array
@@ -20,7 +29,6 @@ class EndpointManager {
 	 * @return void
 	 */
 	public function enableEndpoints() {
-		$routeFilesDir = dirname( __DIR__ ) . '/route-files/';
 		foreach ( $this->getRoutes() as $file => $path ) {
 			if ( !is_readable( $path ) ) {
 				continue;
@@ -45,19 +53,17 @@ class EndpointManager {
 		}
 	}
 
-
 	/**
 	 * @return array
 	 */
 	private function getRoutes(): array {
 		$routes = [];
-		$routesDir = dirname( __DIR__ ) . '/route-files';
-		$files = scandir( $routesDir );
+		$files = scandir( $this->routeFilesDir );
 		foreach ( $files as $file ) {
 			if ( $file === '.' || $file === '..' ) {
 				continue;
 			}
-			$routes[$file] = $routesDir . '/' . $file;
+			$routes[$file] = $this->routeFilesDir . '/' . $file;
 		}
 		return $routes;
 	}
