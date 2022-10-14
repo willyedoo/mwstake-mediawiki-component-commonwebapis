@@ -7,7 +7,7 @@ use MediaWiki\MediaWikiServices;
 
 class Setup {
 
-	public function onExtensionFunctions() {
+	public static function onExtensionFunctions() {
 
 		$endpointManager = MediaWikiServices::getInstance()->getService(
 			'MWStakeCommonWebAPIsEndpointManager'
