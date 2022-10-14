@@ -50,9 +50,13 @@ mws.commonwebapis = {
 			return queryStore( 'user-query-store', params, 'user-data-{user_name}' );
 		},
 		getByUsername: function( username, recache ) {
+			var dfd = $.Deferred();
+			if ( !username || typeof username !== 'string' || username.length < 2) {
+				return dfd.resolve( {} ).promise();
+			}
+
 			// First letter of username to upper
 			username = username.charAt( 0 ).toUpperCase() + username.slice( 1 );
-			var dfd = $.Deferred();
 			if ( !recache && cache.has( 'user-data-' + username ) ) {
 				dfd.resolve( cache.get( 'user-data-' + username ) );
 				return dfd.promise();
