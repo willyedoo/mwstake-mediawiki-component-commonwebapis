@@ -2,12 +2,9 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Rest;
 
-use Elastica\Param;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\Response;
-use MediaWiki\Rest\ResponseFactory;
-use MediaWiki\Rest\SimpleHandler;
 use MWStake\MediaWiki\Component\DataStore\IStore;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use MWStake\MediaWiki\Component\DataStore\ResultSet;

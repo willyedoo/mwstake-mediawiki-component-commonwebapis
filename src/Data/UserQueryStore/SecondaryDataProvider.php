@@ -26,7 +26,7 @@ class SecondaryDataProvider implements ISecondaryDataProvider {
 	}
 
 	/**
-	 * @params array $dataSets
+	 * @param array $dataSets
 	 *
 	 * @return \MWStake\MediaWiki\Component\DataStore\Record[]
 	 */

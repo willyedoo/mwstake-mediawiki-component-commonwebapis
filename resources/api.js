@@ -10,6 +10,40 @@ var cache = {
 		return cache.data[key] !== undefined;
 	}
 }
+
+function querySingle( store, property, value, cacheKey, recache ) {
+	var dfd = $.Deferred();
+	if ( !value || typeof value !== 'string' || value.length < 2 ) {
+		return dfd.resolve( {} ).promise();
+	}
+
+	if ( !recache && cache.has( cacheKey ) ) {
+		dfd.resolve( cache.get( cacheKey ) );
+		return dfd.promise();
+	}
+	mws.commonwebapis[store].query( {
+		filter: JSON.stringify( [
+			{
+				type: 'string',
+				value: value,
+				operator: 'eq',
+				property: property
+			}
+		] ),
+		limit: 1
+	} ).done( function( response ) {
+		if ( response.length > 0 ) {
+			dfd.resolve( response[0] );
+			return;
+		}
+		dfd.resolve( {} );
+	} ).fail( function( err ) {
+		dfd.resolve( err );
+	} );
+
+	return dfd.promise();
+}
+
 function queryStore( store, params, cacheKey ) {
 	var dfd = $.Deferred();
 	$.ajax( {
@@ -50,38 +84,19 @@ mws.commonwebapis = {
 			return queryStore( 'user-query-store', params, 'user-data-{user_name}' );
 		},
 		getByUsername: function( username, recache ) {
-			var dfd = $.Deferred();
-			if ( !username || typeof username !== 'string' || username.length < 2) {
-				return dfd.resolve( {} ).promise();
-			}
-
-			// First letter of username to upper
-			username = username.charAt( 0 ).toUpperCase() + username.slice( 1 );
-			if ( !recache && cache.has( 'user-data-' + username ) ) {
-				dfd.resolve( cache.get( 'user-data-' + username ) );
-				return dfd.promise();
-			}
-			mws.commonwebapis.user.query( {
-				filter: JSON.stringify( [
-					{
-						type: 'string',
-						value: username,
-						operator: 'eq',
-						property: 'user_name'
-					}
-				] ),
-				limit: 1
-			} ).done( function( response ) {
-				if ( response.length > 0 ) {
-					dfd.resolve( response[0] );
-					return;
-				}
-				dfd.resolve( {} );
-			} ).fail( function( err ) {
-				dfd.resolve( err );
-			} );
-
-			return dfd.promise();
+			return querySingle(
+				'user', 'user_name', username, 'user-data-' + username, recache
+			);
+		}
+	},
+	group: {
+		query: function( params ) {
+			return queryStore( 'group-store', params, 'group-{group_name}' );
+		},
+		getByGroupName: function( groupname, recache ) {
+			return querySingle(
+				'group', 'group_name', groupname, 'group-' + groupname, recache
+			);
 		}
 	}
 }

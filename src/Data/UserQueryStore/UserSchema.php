@@ -63,6 +63,6 @@ class UserSchema extends Schema {
 				self::SORTABLE => false ,
 				self::TYPE => FieldType::STRING
 			]
-		]  );
+		] );
 	}
 }

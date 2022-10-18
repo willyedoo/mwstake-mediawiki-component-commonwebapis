@@ -7,7 +7,6 @@ use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\User\UserFactory;
 use MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore\Store;
 use MWStake\MediaWiki\Component\DataStore\IStore;
-use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class UserQueryStore extends QueryStore {

@@ -4,10 +4,8 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\User\UserFactory;
-use MWStake\MediaWiki\Component\DataStore\IReader;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use Wikimedia\Rdbms\ILoadBalancer;
-use Wikimedia\Rdbms\LoadBalancer;
 
 class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	/** @var ILoadBalancer */

@@ -15,7 +15,7 @@ class EndpointManagerTest extends TestCase {
 		$manager = new EndpointManager( __DIR__ . '/data/route-files' );
 
 		$expected = [
-			'dummy-store' =>  [ [
+			'dummy-store' => [ [
 				'path' => '/mws/v1/dummy-store',
 				'class' => 'DummyStore',
 				'services' => [
