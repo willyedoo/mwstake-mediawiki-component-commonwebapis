@@ -28,6 +28,11 @@ class GroupSchema extends Schema {
 				self::SORTABLE => true,
 				self::TYPE => FieldType::STRING
 			],
+			GroupRecord::USERCOUNT => [
+				self::FILTERABLE => false,
+				self::SORTABLE => true,
+				self::TYPE => FieldType::INT
+			],
 		] );
 	}
 }
