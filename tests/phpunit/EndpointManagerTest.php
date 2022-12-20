@@ -45,8 +45,8 @@ class EndpointManagerTest extends TestCase {
 		$manager->enableEndpoints();
 
 		$this->assertSame( [
-			'/data/route-files/dummy-store.json',
-			'/data/route-files/test-store.json',
+			'data/route-files/dummy-store.json',
+			'data/route-files/test-store.json',
 		], $GLOBALS['wgRestAPIAdditionalRouteFiles'] );
 	}
 }
