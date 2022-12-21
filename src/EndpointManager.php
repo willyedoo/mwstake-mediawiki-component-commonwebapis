@@ -33,7 +33,8 @@ class EndpointManager {
 			if ( !is_readable( $path ) ) {
 				continue;
 			}
-			$relative = str_replace( $GLOBALS['IP'], '', $path );
+			$absolutePathPrefix = $GLOBALS['IP'] . DIRECTORY_SEPARATOR;
+			$relative = str_replace( $absolutePathPrefix, '', $path );
 			$GLOBALS['wgRestAPIAdditionalRouteFiles'][] = $relative;
 		}
 	}
