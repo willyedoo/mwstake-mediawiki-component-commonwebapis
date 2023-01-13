@@ -8,6 +8,23 @@ var cache = {
 	},
 	has: function( key ) {
 		return cache.data[key] !== undefined;
+	},
+	delete: function( key ) {
+		if ( cache.has( key ) ) {
+			delete( cache.data[key] );
+		}
+	},
+	getCachedPromise: function( key, callback ) {
+		if ( cache.has( key ) ) {
+			return cache.get( key );
+		}
+		var promise = callback();
+		cache.set( key, promise );
+		promise.done( function() {
+			cache.delete( key );
+		} );
+
+		return promise;
 	}
 }
 
@@ -84,9 +101,9 @@ mws.commonwebapis = {
 			return queryStore( 'user-query-store', params, 'user-data-{user_name}' );
 		},
 		getByUsername: function( username, recache ) {
-			return querySingle(
-				'user', 'user_name', username, 'user-data-' + username, recache
-			);
+			return cache.getCachedPromise( 'user-data-' + username, function() {
+				return querySingle( 'user', 'user_name', username, 'user-data-' + username, recache );
+			} );
 		}
 	},
 	group: {
@@ -94,9 +111,11 @@ mws.commonwebapis = {
 			return queryStore( 'group-store', params, 'group-{group_name}' );
 		},
 		getByGroupName: function( groupname, recache ) {
-			return querySingle(
-				'group', 'group_name', groupname, 'group-' + groupname, recache
-			);
+			return cache.getCachedPromise( 'user-data-' + username, function() {
+				return querySingle(
+					'group', 'group_name', groupname, 'group-' + groupname, recache
+				);
+			} );
 		}
 	}
 }
