@@ -111,7 +111,7 @@ mws.commonwebapis = {
 			return queryStore( 'group-store', params, 'group-{group_name}' );
 		},
 		getByGroupName: function( groupname, recache ) {
-			return cache.getCachedPromise( 'user-data-' + username, function() {
+			return cache.getCachedPromise( 'group-data-' + groupname, function() {
 				return querySingle(
 					'group', 'group_name', groupname, 'group-' + groupname, recache
 				);
