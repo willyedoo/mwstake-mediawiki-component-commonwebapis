@@ -8,10 +8,10 @@ use MWStake\MediaWiki\Component\Utils\Utility\GroupHelper;
 
 class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	/** @var \MWStake\MediaWiki\Component\Utils\Utility\GroupHelper */
-	private $groupHelper;
+	protected $groupHelper;
 
 	/** @var GlobalVarConfig */
-	private $mwsgConfig;
+	protected $mwsgConfig;
 
 	/**
 	 * @param GroupHelper $groupHelper

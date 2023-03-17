@@ -15,7 +15,7 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 	private $blocks = [];
 
 	/** @var GlobalVarConfig */
-	private $mwsgConfig;
+	protected $mwsgConfig;
 
 	/**
 	 * @param IDatabase $db

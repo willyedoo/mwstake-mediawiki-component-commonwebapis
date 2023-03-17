@@ -11,12 +11,12 @@ class PrimaryDataProvider implements IPrimaryDataProvider {
 	/**
 	 * @var GroupHelper
 	 */
-	private $groupHelper;
+	protected $groupHelper;
 
 	/**
 	 * @var \GlobalVarConfig
 	 */
-	private $mwsgConfig;
+	protected $mwsgConfig;
 
 	/**
 	 * @param GroupHelper $groupHelper

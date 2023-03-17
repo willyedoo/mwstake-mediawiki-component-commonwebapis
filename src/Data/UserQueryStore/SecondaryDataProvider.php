@@ -8,11 +8,11 @@ use MWStake\MediaWiki\Component\DataStore\ISecondaryDataProvider;
 
 class SecondaryDataProvider implements ISecondaryDataProvider {
 	/** @var UserFactory */
-	private $userFactory;
+	protected $userFactory;
 	/** @var LinkRenderer */
-	private $linkRenderer;
+	protected $linkRenderer;
 	/** @var \TitleFactory */
-	private $titleFactory;
+	protected $titleFactory;
 
 	/**
 	 * @param UserFactory $userFactory

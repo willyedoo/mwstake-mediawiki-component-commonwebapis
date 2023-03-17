@@ -8,10 +8,10 @@ use MWStake\MediaWiki\Component\Utils\UtilityFactory;
 
 class Store implements IStore {
 	/** @var \MWStake\MediaWiki\Component\Utils\Utility\GroupHelper */
-	private $groupHelper;
+	protected $groupHelper;
 
 	/** @var GlobalVarConfig */
-	private $mwsgConfig;
+	protected $mwsgConfig;
 
 	/**
 	 * @param UtilityFactory $utilityFactory

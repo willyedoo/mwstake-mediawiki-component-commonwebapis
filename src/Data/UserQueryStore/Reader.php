@@ -10,15 +10,15 @@ use Wikimedia\Rdbms\ILoadBalancer;
 
 class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	/** @var ILoadBalancer */
-	private $lb;
+	protected $lb;
 	/** @var UserFactory */
-	private $userFactory;
+	protected $userFactory;
 	/** @var LinkRenderer */
-	private $linkRenderer;
+	protected $linkRenderer;
 	/** @var \TitleFactory */
-	private $titleFactory;
+	protected $titleFactory;
 	/** @var Config */
-	private $mwsgConfig;
+	protected $mwsgConfig;
 
 	/**
 	 * @param ILoadBalancer $lb
