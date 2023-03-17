@@ -37,7 +37,7 @@ class PrimaryDataProvider implements IPrimaryDataProvider {
 
 		$data = [];
 		$explicitGroups = $this->groupHelper->getAvailableGroups( [
-			'filter' => [ 'explicit' ],
+			'filter' => $this->getGroupFilter(),
 			'blacklist' => $this->mwsgConfig->get( 'CommonWebAPIsComponentGroupStoreExcludeGroups' ),
 		] );
 		foreach ( $explicitGroups as $group ) {
@@ -60,6 +60,13 @@ class PrimaryDataProvider implements IPrimaryDataProvider {
 			] );
 		}
 		return $data;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	protected function getGroupFilter(): array {
+		return [ 'explicit' ];
 	}
 
 	/**
