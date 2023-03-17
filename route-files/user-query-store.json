@@ -7,7 +7,8 @@
 			"DBLoadBalancer",
 			"UserFactory",
 			"LinkRenderer",
-			"TitleFactory"
+			"TitleFactory",
+			"MWStakeCommonUtilsConfig"
 		]
 	}
 ]

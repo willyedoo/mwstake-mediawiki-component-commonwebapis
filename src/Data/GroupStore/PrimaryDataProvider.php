@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\GroupStore;
 
+use GlobalVarConfig;
 use MWStake\MediaWiki\Component\DataStore\IPrimaryDataProvider;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use MWStake\MediaWiki\Component\Utils\Utility\GroupHelper;
@@ -13,10 +14,17 @@ class PrimaryDataProvider implements IPrimaryDataProvider {
 	private $groupHelper;
 
 	/**
-	 * @param GroupHelper $groupHelper
+	 * @var \GlobalVarConfig
 	 */
-	public function __construct( GroupHelper $groupHelper ) {
+	private $mwsgConfig;
+
+	/**
+	 * @param GroupHelper $groupHelper
+	 * @param GlobalVarConfig $mwsgConfig
+	 */
+	public function __construct( GroupHelper $groupHelper, GlobalVarConfig $mwsgConfig ) {
 		$this->groupHelper = $groupHelper;
+		$this->mwsgConfig = $mwsgConfig;
 	}
 
 	/**
@@ -28,7 +36,10 @@ class PrimaryDataProvider implements IPrimaryDataProvider {
 		$query = strtolower( $params->getQuery() );
 
 		$data = [];
-		$explicitGroups = $this->groupHelper->getAvailableGroups( [ 'filter' => [ 'explicit' ] ] );
+		$explicitGroups = $this->groupHelper->getAvailableGroups( [
+			'filter' => [ 'explicit' ],
+			'blacklist' => $this->mwsgConfig->get( 'CommonWebAPIsComponentGroupStoreExcludeGroups' ),
+		] );
 		foreach ( $explicitGroups as $group ) {
 			$displayName = $group;
 			$msg = \Message::newFromKey( "group-$group" );

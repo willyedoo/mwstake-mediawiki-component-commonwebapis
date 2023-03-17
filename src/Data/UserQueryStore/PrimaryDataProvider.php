@@ -2,14 +2,30 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 
+use GlobalVarConfig;
 use MWStake\MediaWiki\Component\DataStore\PrimaryDatabaseDataProvider;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
+use MWStake\MediaWiki\Component\DataStore\Schema;
+use Wikimedia\Rdbms\IDatabase;
 
 class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 	/** @var array */
 	private $groups = [];
 	/** @var array */
 	private $blocks = [];
+
+	/** @var GlobalVarConfig */
+	private $mwsgConfig;
+
+	/**
+	 * @param IDatabase $db
+	 * @param Schema $schema
+	 * @param GlobalVarConfig $mwsgConfig
+	 */
+	public function __construct( IDatabase $db, Schema $schema, GlobalVarConfig $mwsgConfig ) {
+		parent::__construct( $db, $schema );
+		$this->mwsgConfig = $mwsgConfig;
+	}
 
 	/**
 	 * @inheritDoc
@@ -32,10 +48,13 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 	 * @return array
 	 */
 	private function getGroups() {
+		$groupBlacklist = $this->mwsgConfig->get( 'CommonWebAPIsComponentUserStoreExcludeGroups' );
 		$res = $this->db->select(
 			'user_groups',
 			[ 'ug_user', 'ug_group' ],
-			[],
+			[
+				'ug_group NOT IN (' . $this->db->makeList( $groupBlacklist ) . ')',
+			],
 			__METHOD__
 		);
 		$groups = [];
@@ -78,6 +97,15 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 				],
 				LIST_OR
 			);
+		}
+		// General system user identifier
+		$conds[] = 'user_token NOT ' . $this->db->buildLike(
+			$this->db->anyString(), 'INVALID', $this->db->anyString()
+		);
+
+		$userBlacklist = $this->mwsgConfig->get( 'CommonWebAPIsComponentUserStoreExcludeUsers' );
+		if ( is_array( $userBlacklist ) && count( $userBlacklist ) > 0 ) {
+			$conds[] = 'user_name NOT IN (' . $this->db->makeList( $userBlacklist ) . ')';
 		}
 
 		return $conds;

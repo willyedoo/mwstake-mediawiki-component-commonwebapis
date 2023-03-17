@@ -4,7 +4,7 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '1.0.12' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '1.0.13' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 	->register( 'commonwebapis', function () {
@@ -22,4 +22,13 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 				]
 			);
 		};
+
+		// Exclude users from these groups in user store
+		$GLOBALS['mwsgCommonWebAPIsComponentUserStoreExcludeGroups'] = [ 'bot' ];
+		// Exclude porticular users from user store
+		$GLOBALS['mwsgCommonWebAPIsComponentUserStoreExcludeUsers'] = [
+			'MediaWiki default', 'Mediawiki default'
+		];
+		// Exclude these groups from group store
+		$GLOBALS['mwsgCommonWebAPIsComponentGroupStoreExcludeGroups'] = [ 'bot' ];
 	} );

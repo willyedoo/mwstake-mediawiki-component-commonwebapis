@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Rest;
 
+use GlobalVarConfig;
 use MediaWiki\HookContainer\HookContainer;
 use MWStake\MediaWiki\Component\CommonWebAPIs\Data\GroupStore\Store;
 use MWStake\MediaWiki\Component\DataStore\IStore;
@@ -14,10 +15,13 @@ class GroupStore extends QueryStore {
 	/**
 	 * @param HookContainer $hookContainer
 	 * @param UtilityFactory $utilityFactory
+	 * @param GlobalVarConfig $mwsgConfig
 	 */
-	public function __construct( HookContainer $hookContainer, UtilityFactory $utilityFactory ) {
+	public function __construct(
+		HookContainer $hookContainer, UtilityFactory $utilityFactory, GlobalVarConfig $mwsgConfig
+	) {
 		parent::__construct( $hookContainer );
-		$this->store = new Store( $utilityFactory );
+		$this->store = new Store( $utilityFactory, $mwsgConfig );
 	}
 
 	/**

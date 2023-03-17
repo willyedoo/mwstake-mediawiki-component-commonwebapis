@@ -2,6 +2,7 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 
+use GlobalVarConfig;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\User\UserFactory;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
@@ -16,22 +17,26 @@ class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	private $linkRenderer;
 	/** @var \TitleFactory */
 	private $titleFactory;
+	/** @var Config */
+	private $mwsgConfig;
 
 	/**
 	 * @param ILoadBalancer $lb
 	 * @param UserFactory $userFactory
 	 * @param LinkRenderer $linkRenderer
 	 * @param \TitleFactory $titleFactory
+	 * @param GlobalVarConfig $mwsgConfig
 	 */
 	public function __construct(
 		ILoadBalancer $lb, UserFactory $userFactory,
-		LinkRenderer $linkRenderer, \TitleFactory $titleFactory
+		LinkRenderer $linkRenderer, \TitleFactory $titleFactory, GlobalVarConfig $mwsgConfig
 	) {
 		parent::__construct();
 		$this->lb = $lb;
 		$this->userFactory = $userFactory;
 		$this->linkRenderer = $linkRenderer;
 		$this->titleFactory = $titleFactory;
+		$this->mwsgConfig = $mwsgConfig;
 	}
 
 	/**
@@ -48,7 +53,7 @@ class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	 */
 	public function makePrimaryDataProvider( $params ) {
 		return new PrimaryDataProvider(
-			$this->lb->getConnection( DB_REPLICA ), $this->getSchema()
+			$this->lb->getConnection( DB_REPLICA ), $this->getSchema(), $this->mwsgConfig
 		);
 	}
 
