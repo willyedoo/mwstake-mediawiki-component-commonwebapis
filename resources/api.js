@@ -101,7 +101,7 @@ mws.commonwebapis = {
 			return queryStore( 'user-query-store', params, 'user-data-{user_name}' );
 		},
 		getByUsername: function( username, recache ) {
-			return cache.getCachedPromise( 'user-data-' + username, function() {
+			return cache.getCachedPromise( 'promise-user-data-' + username, function() {
 				return querySingle( 'user', 'user_name', username, 'user-data-' + username, recache );
 			} );
 		}
@@ -111,7 +111,7 @@ mws.commonwebapis = {
 			return queryStore( 'group-store', params, 'group-{group_name}' );
 		},
 		getByGroupName: function( groupname, recache ) {
-			return cache.getCachedPromise( 'group-data-' + groupname, function() {
+			return cache.getCachedPromise( 'promise-group-data-' + groupname, function() {
 				return querySingle(
 					'group', 'group_name', groupname, 'group-' + groupname, recache
 				);
