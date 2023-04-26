@@ -3,6 +3,8 @@
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\UserQueryStore;
 
 use GlobalVarConfig;
+use MediaWiki\MediaWikiServices;
+use MWStake\MediaWiki\Component\DataStore\Filter;
 use MWStake\MediaWiki\Component\DataStore\PrimaryDatabaseDataProvider;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use MWStake\MediaWiki\Component\DataStore\Schema;
@@ -83,15 +85,24 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 	 * @return array
 	 */
 	protected function makePreFilterConds( ReaderParams $params ) {
+		$filters = $params->getFilter();
 		$conds = parent::makePreFilterConds( $params );
 		$query = $params->getQuery();
+		foreach ( $filters as $filter ) {
+			if ( $filter->getField() === 'user_name' ) {
+				$query = mb_strtolower( $filter->getValue() );
+				$filter->setApplied( true );
+			}
+		}
+
 		if ( $query !== '' ) {
+			$query = mb_strtolower( $query );
 			$conds[] = $this->db->makeList(
 				[
-					'user_name ' . $this->db->buildLike(
+					'mui_user_name ' . $this->db->buildLike(
 						$this->db->anyString(), $query, $this->db->anyString()
 					),
-					'user_real_name ' . $this->db->buildLike(
+					'mui_user_real_name ' . $this->db->buildLike(
 						$this->db->anyString(), $query, $this->db->anyString()
 					)
 				],
@@ -109,6 +120,13 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		}
 
 		return $conds;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function skipPreFilter( Filter $filter ) {
+		return $filter->getField() === 'user_name';
 	}
 
 	/**
@@ -132,9 +150,20 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 	}
 
 	/**
+	 * @inheritDoc
+	 */
+	protected function getJoinConds( ReaderParams $params ) {
+		return [
+			'mws_user_index' => [
+				'INNER JOIN', [ 'user_id = mui_user_id' ]
+			]
+		];
+	}
+
+	/**
 	 * @return string[]
 	 */
 	protected function getTableNames() {
-		return [ 'user' ];
+		return [ 'user', 'mws_user_index' ];
 	}
 }
