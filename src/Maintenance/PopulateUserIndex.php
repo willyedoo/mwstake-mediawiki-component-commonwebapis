@@ -30,7 +30,8 @@ class PopulateUserIndex extends \LoggedUpdateMaintenance {
 				$db->insert(
 					'mws_user_index',
 					$toInsert,
-					__METHOD__
+					__METHOD__,
+					[ 'IGNORE' ]
 				);
 				$toInsert = [];
 			}
