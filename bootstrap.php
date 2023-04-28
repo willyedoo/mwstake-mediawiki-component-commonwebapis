@@ -5,7 +5,7 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '1.0.19' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '1.0.20' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 	->register( 'commonwebapis', function () {
@@ -46,13 +46,15 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			$userIndexUpdater->store( $user );
 		};
 
-		$lb = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
-		$titleIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\TitleIndexUpdater( $lb );
-		$GLOBALS['wgHooks']['PageSaveComplete'][] = [ $titleIndexUpdater, 'onPageSaveComplete' ];
-		$GLOBALS['wgHooks']['PageMoveComplete'][] = [ $titleIndexUpdater, 'onPageMoveComplete' ];
-		$GLOBALS['wgHooks']['PageDeleteComplete'][] = [ $titleIndexUpdater, 'onPageDeleteComplete' ];
-		$GLOBALS['wgHooks']['PageUndelete'][] = [ $titleIndexUpdater, 'onPageUndelete' ];
-		$GLOBALS['wgHooks']['AfterImportPage'][] = [ $titleIndexUpdater, 'onAfterImportPage' ];
+		$GLOBALS['wgExtensionFunctions'][] = static function() {
+			$lb = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
+			$titleIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\TitleIndexUpdater( $lb );
+			$GLOBALS['wgHooks']['PageSaveComplete'][] = [ $titleIndexUpdater, 'onPageSaveComplete' ];
+			$GLOBALS['wgHooks']['PageMoveComplete'][] = [ $titleIndexUpdater, 'onPageMoveComplete' ];
+			$GLOBALS['wgHooks']['PageDeleteComplete'][] = [ $titleIndexUpdater, 'onPageDeleteComplete' ];
+			$GLOBALS['wgHooks']['ArticleUndelete'][] = [ $titleIndexUpdater, 'onArticleUndelete' ];
+			$GLOBALS['wgHooks']['AfterImportPage'][] = [ $titleIndexUpdater, 'onAfterImportPage' ];
+		};
 
 		// Exclude users from these groups in user store
 		$GLOBALS['mwsgCommonWebAPIsComponentUserStoreExcludeGroups'] = [ 'bot' ];

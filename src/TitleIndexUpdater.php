@@ -5,6 +5,7 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 use ManualLogEntry;
 use MediaWiki\Hook\AfterImportPageHook;
 use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\Page\Hook\ArticleUndeleteHook;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\Hook\PageUndeleteHook;
 use MediaWiki\Page\PageIdentity;
@@ -18,7 +19,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class TitleIndexUpdater implements PageSaveCompleteHook,
 	PageMoveCompleteHook,
 	PageDeleteCompleteHook,
-	PageUndeleteHook,
+	ArticleUndeleteHook,
 	AfterImportPageHook
 {
 
@@ -67,11 +68,8 @@ class TitleIndexUpdater implements PageSaveCompleteHook,
 	/**
 	 * @inheritDoc
 	 */
-	public function onPageUndelete(
-		ProperPageIdentity $page, Authority $performer, string $reason, bool $unsuppress,
-		array $timestamps, array $fileVersions, StatusValue $status
-	) {
-		// TODO: Implement onPageUndelete() method.
+	public function onArticleUndelete( $title, $create, $comment, $oldPageId, $restoredPages ) {
+		$this->insert( $title, $oldPageId );
 	}
 
 	/**
@@ -86,7 +84,7 @@ class TitleIndexUpdater implements PageSaveCompleteHook,
 	 *
 	 * @return bool|void
 	 */
-	private function insert( PageIdentity $page ) {
+	private function insert( PageIdentity $page, $forceId = null ) {
 		$db = $this->lb->getConnection( DB_PRIMARY );
 		if ( !$page->exists() ) {
 			return;
@@ -94,7 +92,7 @@ class TitleIndexUpdater implements PageSaveCompleteHook,
 		return $db->insert(
 			'mws_title_index',
 			[
-				'mti_page_id' => $page->getId(),
+				'mti_page_id' => $forceId ?? $page->getId(),
 				'mti_namespace' => $page->getNamespace(),
 				'mti_title' => mb_strtolower( str_replace( '_', ' ', $page->getDBkey() ) ),
 			],
@@ -115,7 +113,7 @@ class TitleIndexUpdater implements PageSaveCompleteHook,
 			'mws_title_index',
 			[
 				'mti_namespace' => $namespace,
-				'mti_title' => mb_strtolower( str_replace( '_', ' ', $title->page_title ) ),
+				'mti_title' => mb_strtolower( str_replace( '_', ' ', $title ) ),
 			],
 			__METHOD__
 		);
