@@ -2,16 +2,16 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance;
 
-class PopulateUserIndex extends \LoggedUpdateMaintenance {
+class PopulateTitleIndex extends \LoggedUpdateMaintenance {
 	/**
 	 * @return bool
 	 */
 	protected function doDBUpdates() {
 		$db = $this->getDB( DB_PRIMARY );
 
-		$users = $db->select(
-			'user',
-			[ 'user_id', 'user_name', 'user_real_name' ],
+		$titles = $db->select(
+			'page',
+			[ 'page_id', 'page_namespace', 'page_title' ],
 			[],
 			__METHOD__
 		);
@@ -19,15 +19,15 @@ class PopulateUserIndex extends \LoggedUpdateMaintenance {
 		$toInsert = [];
 		$cnt = 0;
 $batch = 250;
-		foreach ( $users as $user ) {
+		foreach ( $titles as $title ) {
 			$toInsert[] = [
-				'mui_user_id' => $user->user_id,
-				'mui_user_name' => mb_strtolower( $user->user_name ),
-				'mui_user_real_name' => mb_strtolower( $user->user_real_name )
+				'mti_page_id' => $title->page_id,
+				'mti_namespace' => mb_strtolower( $title->page_namespace ),
+				'mti_title' => mb_strtolower( str_replace( '_', ' ', $title->page_title ) )
 			];
 			if ( $cnt % $batch === 0 ) {
 				$db->insert(
-					'mws_user_index',
+					'mws_title_index',
 					$toInsert,
 					__METHOD__,
 					[ 'IGNORE' ]
@@ -36,7 +36,7 @@ $batch = 250;
 			}
 		}
 
-		$this->output( "Indexed $cnt users\n" );
+		$this->output( "Indexed $cnt pages\n" );
 
 		return true;
 	}
@@ -45,6 +45,6 @@ $batch = 250;
 	 * @return string
 	 */
 	protected function getUpdateKey() {
-		return 'mws-user-index-init';
+		return 'mws-title-index-init';
 	}
 }

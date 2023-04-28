@@ -2,7 +2,6 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 
-use MediaWiki\User\UserIdentity;
 use User;
 use Wikimedia\Rdbms\ILoadBalancer;
 

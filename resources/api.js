@@ -38,7 +38,7 @@ function querySingle( store, property, value, cacheKey, recache ) {
 		dfd.resolve( cache.get( cacheKey ) );
 		return dfd.promise();
 	}
-	mws.commonwebapis[store].query( {
+	mws.commonwebapis[store].query( '', {
 		filter: JSON.stringify( [
 			{
 				type: 'string',
@@ -71,6 +71,9 @@ function queryStore( store, params, cacheKey ) {
 		if ( response && response.results ) {
 			for ( var i = 0; i < response.results.length; i++ ) {
 				var result = response.results[i];
+				if ( !cacheKey ) {
+					continue;
+				}
 				// Replace named placeholders in curly braces with actual values
 				var key = cacheKey.replace( /\{([^}]+)\}/g, function( match, p1 ) {
 					return result[p1];
@@ -81,9 +84,6 @@ function queryStore( store, params, cacheKey ) {
 				}
 				cache.set( key, result );
 			}
-
-
-
 			dfd.resolve( response.results );
 			return;
 		}
@@ -97,7 +97,10 @@ function queryStore( store, params, cacheKey ) {
 mws = window.mws || {};
 mws.commonwebapis = {
 	user: {
-		query: function( params ) {
+		query: function( query, params ) {
+			if ( query ) {
+				params = ( params || {} ).query = query;
+			}
 			return queryStore( 'user-query-store', params, 'user-data-{user_name}' );
 		},
 		getByUsername: function( username, recache ) {
@@ -107,7 +110,10 @@ mws.commonwebapis = {
 		}
 	},
 	group: {
-		query: function( params ) {
+		query: function( query, params ) {
+			if ( query ) {
+				params = ( params || {} ).query = query;
+			}
 			return queryStore( 'group-store', params, 'group-{group_name}' );
 		},
 		getByGroupName: function( groupname, recache ) {
@@ -115,6 +121,27 @@ mws.commonwebapis = {
 				return querySingle(
 					'group', 'group_name', groupname, 'group-' + groupname, recache
 				);
+			} );
+		}
+	},
+	title: {
+		query: function( query, params ) {
+			return cache.getCachedPromise( 'promise-title-query', function() {
+				return queryStore( 'title-query-store', $.extend( { query: query }, params || {} ) );
+			} );
+		},
+		getByPrefixedText: function( prefixedText, recache ) {
+			return cache.getCachedPromise( 'promise-title-data-' + prefixedText, function() {
+				return querySingle(
+					'title', 'prefixed', prefixedText, 'title-' + prefixedText, recache
+				);
+			} );
+		}
+	},
+	file: {
+		query: function( query, params ) {
+			return cache.getCachedPromise( 'promise-file-query', function() {
+				return queryStore( 'file-query-store', $.extend( { query: query }, params || {} ) );
 			} );
 		}
 	}
