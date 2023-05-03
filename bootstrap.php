@@ -5,10 +5,10 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.0' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.1' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
-	->register( 'commonwebapis', function () {
+	->register( 'commonwebapis', static function () {
 		$GLOBALS['wgExtensionFunctions'][]
 			= "\\MWStake\\MediaWiki\\Component\\CommonWebAPIs\\Setup::onExtensionFunctions";
 		$GLOBALS['wgServiceWiringFiles'][] = __DIR__ . '/includes/ServiceWiring.php';
@@ -19,16 +19,6 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			$userIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\UserIndexUpdater( $lb );
 			$hookContainer = \MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 
-			$hookContainer->register( 'ResourceLoaderRegisterModules', static function ( $resourceLoader ) {
-				$resourceLoader->register(
-					[
-						'ext.mws.commonwebapis' => [
-							'localBasePath' => __DIR__ . '/resources',
-							'scripts' => [ "api.js" ],
-						]
-					]
-				);
-			} );
 			$hookContainer->register( 'LoadExtensionSchemaUpdates', static function ( $updater ) {
 				$updater->addExtensionTable(
 					'mws_user_index',
@@ -55,6 +45,13 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			$hookContainer->register( 'ArticleUndelete', [ $titleIndexUpdater, 'onArticleUndelete' ] );
 			$hookContainer->register( 'AfterImportPage', [ $titleIndexUpdater, 'onAfterImportPage' ] );
 		};
+
+		$GLOBALS['wgResourceModules']['ext.mws.commonwebapis'] = [
+			'scripts' => [
+				'api.js'
+			],
+			'localBasePath' => __DIR__ . '/resources'
+		];
 
 		// Exclude users from these groups in user store
 		$GLOBALS['mwsgCommonWebAPIsComponentUserStoreExcludeGroups'] = [ 'bot' ];
