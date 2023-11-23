@@ -40,6 +40,9 @@ class PopulateTitleIndex extends \LoggedUpdateMaintenance {
 		return true;
 	}
 
+	/**
+	 * @param array $batch
+	 */
 	private function insertBatch( array $batch ) {
 		$db = $this->getDB( DB_PRIMARY );
 		$db->insert(
