@@ -1,6 +1,5 @@
 <?php
 
-
 if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
@@ -13,7 +12,7 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			= "\\MWStake\\MediaWiki\\Component\\CommonWebAPIs\\Setup::onExtensionFunctions";
 		$GLOBALS['wgServiceWiringFiles'][] = __DIR__ . '/includes/ServiceWiring.php';
 
-		$GLOBALS['wgExtensionFunctions'][] = static function() {
+		$GLOBALS['wgExtensionFunctions'][] = static function () {
 			$lb = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
 			$titleIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\TitleIndexUpdater( $lb );
 			$userIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\UserIndexUpdater( $lb );

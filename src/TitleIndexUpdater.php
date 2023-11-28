@@ -7,16 +7,15 @@ use MediaWiki\Hook\AfterImportPageHook;
 use MediaWiki\Hook\PageMoveCompleteHook;
 use MediaWiki\Page\Hook\ArticleUndeleteHook;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
-use MediaWiki\Page\Hook\PageUndeleteHook;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Storage\Hook\PageSaveCompleteHook;
-use StatusValue;
 use Wikimedia\Rdbms\ILoadBalancer;
 
-class TitleIndexUpdater implements PageSaveCompleteHook,
+class TitleIndexUpdater implements
+	PageSaveCompleteHook,
 	PageMoveCompleteHook,
 	PageDeleteCompleteHook,
 	ArticleUndeleteHook,
@@ -81,6 +80,7 @@ class TitleIndexUpdater implements PageSaveCompleteHook,
 
 	/**
 	 * @param PageIdentity $page
+	 * @param int|null $forceId (optional)
 	 *
 	 * @return bool|void
 	 */

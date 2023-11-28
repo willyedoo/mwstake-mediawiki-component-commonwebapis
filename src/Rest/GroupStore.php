@@ -27,7 +27,7 @@ class GroupStore extends QueryStore {
 	/**
 	 * @return IStore
 	 */
-	protected function getStore() : IStore {
+	protected function getStore(): IStore {
 		return $this->store;
 	}
 }
