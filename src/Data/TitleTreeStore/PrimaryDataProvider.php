@@ -78,7 +78,6 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 					$this->insertNonExistingPage( $row, $nonExistingRootParent );
 				}
 			}
-
 			return;
 		}
 		if ( $this->isExpandRequested( $row->page_title, (int)$row->page_namespace ) ) {
@@ -140,8 +139,8 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 		}
 		$exploded = explode( '/', $indexTitle );
 		// Get rid of the first element, which is the root page name
-		array_shift( $exploded );
-		return strpos( $indexTitle, $this->query ) !== false;
+		$last = array_pop( $exploded );
+		return strpos( $last, $this->query ) !== false;
 	}
 
 	/**

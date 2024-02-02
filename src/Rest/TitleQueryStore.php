@@ -14,6 +14,10 @@ class TitleQueryStore extends QueryStore {
 	protected $titleFactory;
 	/** @var \Language */
 	protected $language;
+	/** @var \NamespaceInfo */
+	protected $nsInfo;
+	/** @var \PageProps */
+	protected $pageProps;
 
 	/**
 	 * @param HookContainer $hookContainer
@@ -21,22 +25,24 @@ class TitleQueryStore extends QueryStore {
 	 * @param \TitleFactory $titleFactory
 	 * @param \Language $language
 	 * @param \NamespaceInfo $nsInfo
+	 * @param \PageProps $pageProps
 	 */
 	public function __construct(
 		HookContainer $hookContainer, ILoadBalancer $lb, \TitleFactory $titleFactory,
-		\Language $language, \NamespaceInfo $nsInfo
+		\Language $language, \NamespaceInfo $nsInfo, \PageProps $pageProps
 	) {
 		parent::__construct( $hookContainer );
 		$this->lb = $lb;
 		$this->titleFactory = $titleFactory;
 		$this->language = $language;
 		$this->nsInfo = $nsInfo;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
 	 * @return IStore
 	 */
 	protected function getStore(): IStore {
-		return new Store( $this->lb, $this->titleFactory, $this->language, $this->nsInfo );
+		return new Store( $this->lb, $this->titleFactory, $this->language, $this->nsInfo, $this->pageProps );
 	}
 }

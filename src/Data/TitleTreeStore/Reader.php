@@ -37,6 +37,6 @@ class Reader extends \MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleQueryS
 	 * @return SecondaryDataProvider
 	 */
 	public function makeSecondaryDataProvider() {
-		return new SecondaryDataProvider( $this->titleFactory, $this->language );
+		return new SecondaryDataProvider( $this->titleFactory, $this->language, $this->pageProps );
 	}
 }

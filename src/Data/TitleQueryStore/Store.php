@@ -14,20 +14,25 @@ class Store implements IStore {
 	protected $language;
 	/** @var \NamespaceInfo */
 	protected $nsInfo;
+	/** @var \PageProps */
+	protected $pageProps;
 
 	/**
 	 * @param ILoadBalancer $lb
 	 * @param \TitleFactory $titleFactory
 	 * @param \Language $language
 	 * @param \NamespaceInfo $nsInfo
+	 * @param \PageProps $pageProps
 	 */
 	public function __construct(
-		ILoadBalancer $lb, \TitleFactory $titleFactory, \Language $language, \NamespaceInfo $nsInfo
+		ILoadBalancer $lb, \TitleFactory $titleFactory, \Language $language,
+		\NamespaceInfo $nsInfo, \PageProps $pageProps
 	) {
 		$this->lb = $lb;
 		$this->titleFactory = $titleFactory;
 		$this->language = $language;
 		$this->nsInfo = $nsInfo;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
@@ -42,7 +47,7 @@ class Store implements IStore {
 	 */
 	public function getReader() {
 		return new Reader(
-			$this->lb, $this->titleFactory, $this->language, $this->nsInfo
+			$this->lb, $this->titleFactory, $this->language, $this->nsInfo, $this->pageProps
 		);
 	}
 

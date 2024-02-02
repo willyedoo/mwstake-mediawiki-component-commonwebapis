@@ -32,6 +32,11 @@ class TitleSchema extends Schema {
 				self::SORTABLE => true,
 				self::TYPE => FieldType::STRING
 			],
+			TitleRecord::PAGE_DISPLAY_TITLE => [
+				self::FILTERABLE => true,
+				self::SORTABLE => true,
+				self::TYPE => FieldType::STRING
+			],
 			TitleRecord::PAGE_NAMESPACE => [
 				self::FILTERABLE => true,
 				self::SORTABLE => true,

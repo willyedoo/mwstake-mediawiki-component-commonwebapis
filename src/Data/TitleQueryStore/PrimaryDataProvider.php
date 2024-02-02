@@ -40,7 +40,10 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 		$conds = parent::makePreFilterConds( $params );
 		$query = $params->getQuery();
 		foreach ( $filters as $filter ) {
-			if ( in_array( $filter->getField(), [ TitleRecord::PAGE_DBKEY, TitleRecord::PAGE_TITLE ] ) ) {
+			if (
+				in_array( $filter->getField(), [
+					TitleRecord::PAGE_DBKEY, TitleRecord::PAGE_DISPLAY_TITLE, TitleRecord::PAGE_TITLE
+				] ) ) {
 				$filter->setApplied( true );
 			}
 			if ( $filter->getField() === TitleRecord::PAGE_NAMESPACE ) {
@@ -66,9 +69,13 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 
 		if ( $query !== '' ) {
 			$query = mb_strtolower( str_replace( '_', ' ', $query ) );
-			$conds[] = 'mti_title ' . $this->db->buildLike(
+			$titleQuery = 'mti_title ' . $this->db->buildLike(
 				$this->db->anyString(), $query, $this->db->anyString()
 			);
+			$displayTitleQuery = 'mti_displaytitle ' . $this->db->buildLike(
+				$this->db->anyString(), $query, $this->db->anyString()
+			);
+			$conds[] = "($titleQuery OR $displayTitleQuery)";
 		}
 
 		return $conds;

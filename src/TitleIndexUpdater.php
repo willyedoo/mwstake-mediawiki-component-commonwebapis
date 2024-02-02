@@ -5,6 +5,7 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 use ManualLogEntry;
 use MediaWiki\Hook\AfterImportPageHook;
 use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\ArticleUndeleteHook;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\PageIdentity;
@@ -12,6 +13,7 @@ use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Storage\Hook\PageSaveCompleteHook;
+use PageProps;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class TitleIndexUpdater implements
@@ -25,13 +27,20 @@ class TitleIndexUpdater implements
 	/**
 	 * @var ILoadBalancer
 	 */
-	private $lb = null;
+	private $lb;
+
+	/**
+	 * @var PageProps
+	 */
+	private $pageProps;
 
 	/**
 	 * @param ILoadBalancer $lb
+	 * @param PageProps $pageProps
 	 */
-	public function __construct( ILoadBalancer $lb ) {
+	public function __construct( ILoadBalancer $lb, PageProps $pageProps ) {
 		$this->lb = $lb;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
@@ -40,9 +49,6 @@ class TitleIndexUpdater implements
 	public function onPageSaveComplete(
 		$wikiPage, $user, $summary, $flags, $revisionRecord, $editResult
 	) {
-		if ( !( $flags & EDIT_NEW ) ) {
-			return;
-		}
 		$this->insert( $wikiPage->getTitle() );
 	}
 
@@ -89,15 +95,25 @@ class TitleIndexUpdater implements
 		if ( !$page->exists() ) {
 			return;
 		}
+		// Cheaper to delete and insert, then to check if it exists
+		$db->delete(
+			'mws_title_index',
+			[
+				'mti_page_id' => $forceId ?? $page->getId()
+			],
+			__METHOD__
+		);
+
 		return $db->insert(
 			'mws_title_index',
 			[
 				'mti_page_id' => $forceId ?? $page->getId(),
 				'mti_namespace' => $page->getNamespace(),
 				'mti_title' => mb_strtolower( str_replace( '_', ' ', $page->getDBkey() ) ),
+				'mti_displaytitle' => $this->getDisplayTitle( $page ),
 			],
 			__METHOD__,
-			[ 'IGNORE' ]
+			[ 'OVERWRITE' ]
 		);
 	}
 
@@ -117,5 +133,18 @@ class TitleIndexUpdater implements
 			],
 			__METHOD__
 		);
+	}
+
+	/**
+	 * @param PageIdentity $page
+	 *
+	 * @return string
+	 */
+	private function getDisplayTitle( PageIdentity $page ): string {
+		$display = $this->pageProps->getProperties( $page, 'displaytitle'	);
+		if ( isset( $display[$page->getId()] ) ) {
+			return mb_strtolower( str_replace( '_', ' ', $display[$page->getId()] ) );
+		}
+		return '';
 	}
 }

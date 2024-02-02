@@ -2,22 +2,28 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleQueryStore;
 
+use MediaWiki\MediaWikiServices;
 use MWStake\MediaWiki\Component\DataStore\ISecondaryDataProvider;
 use MWStake\MediaWiki\Component\DataStore\Record;
+use Title;
 
 class SecondaryDataProvider implements ISecondaryDataProvider {
 	/** @var \TitleFactory */
 	protected $titleFactory;
 	/** @var \Language */
 	protected $language;
+	/** @var \PageProps */
+	protected $pageProps;
 
 	/**
 	 * @param \TitleFactory $titleFactory
 	 * @param \Language $language
+	 * @param \PageProps $pageProps
 	 */
-	public function __construct( $titleFactory, \Language $language ) {
+	public function __construct( $titleFactory, \Language $language, \PageProps $pageProps ) {
 		$this->titleFactory = $titleFactory;
 		$this->language = $language;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
@@ -36,27 +42,41 @@ class SecondaryDataProvider implements ISecondaryDataProvider {
 
 	/**
 	 * @param Record $dataSet
-	 * @param \Title $title
+	 * @param Title $title
 	 *
 	 * @return void
 	 */
-	protected function extendWithTitle( Record $dataSet, \Title $title ) {
+	protected function extendWithTitle( Record $dataSet, Title $title ) {
 		$dataSet->set( TitleRecord::PAGE_TITLE, $title->getText() );
 		$dataSet->set( TitleRecord::PAGE_PREFIXED, $title->getPrefixedText() );
 		$dataSet->set( TitleRecord::PAGE_URL, $title->getLocalURL() );
 		$dataSet->set(
 			TitleRecord::PAGE_NAMESPACE_TEXT, $this->language->getNsText( $title->getNamespace() )
 		);
+		$dataSet->set( TitleRecord::PAGE_DISPLAY_TITLE, $this->getDisplayTitle( $title ) );
 	}
 
 	/**
 	 * @param Record $record
 	 *
-	 * @return \Title|null
+	 * @return Title|null
 	 */
 	protected function titleFromRecord( $record ) {
 		return $this->titleFactory->makeTitle(
 			$record->get( TitleRecord::PAGE_NAMESPACE ), $record->get( TitleRecord::PAGE_TITLE )
 		);
+	}
+
+	/**
+	 * @param Title $title
+	 *
+	 * @return string
+	 */
+	protected function getDisplayTitle( Title $title ) {
+		$display = $this->pageProps->getProperties( $title, 'displaytitle' );
+		if ( isset( $display[$title->getId()] ) ) {
+			return mb_strtolower( str_replace( '_', ' ', $display[$title->getId()] ) );
+		}
+		return '';
 	}
 }

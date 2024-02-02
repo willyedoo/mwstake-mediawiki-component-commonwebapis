@@ -4,7 +4,7 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.8' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.9' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 	->register( 'commonwebapis', static function () {
@@ -14,7 +14,8 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 
 		$GLOBALS['wgExtensionFunctions'][] = static function () {
 			$lb = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer();
-			$titleIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\TitleIndexUpdater( $lb );
+			$pageProps = \MediaWiki\MediaWikiServices::getInstance()->getPageProps();
+			$titleIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\TitleIndexUpdater( $lb, $pageProps );
 			$userIndexUpdater = new \MWStake\MediaWiki\Component\CommonWebAPIs\UserIndexUpdater( $lb );
 			$hookContainer = \MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 
@@ -27,6 +28,11 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 					'mws_title_index',
 					__DIR__ . "/sql/mws_title_index.sql"
 				);
+				$updater->addExtensionField(
+					'mws_title_index',
+					'mti_displaytitle',
+					__DIR__ . "/sql/mws_title_index_displaytitle_patch.sql"
+				);
 
 				$updater->addPostDatabaseUpdateMaintenance(
 					\MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance\PopulateUserIndex::class
@@ -34,6 +40,10 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 				$updater->addPostDatabaseUpdateMaintenance(
 					\MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance\PopulateTitleIndex::class
 				);
+				$updater->addPostDatabaseUpdateMaintenance(
+					\MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance\UpdateTitleIndexDisplayTitle::class
+				);
+
 			} );
 
 			$hookContainer->register( 'UserSaveSettings', [ $userIndexUpdater, 'store' ] );

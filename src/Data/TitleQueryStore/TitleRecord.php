@@ -10,6 +10,7 @@ class TitleRecord extends Record {
 	public const PAGE_DBKEY = 'dbkey';
 	public const PAGE_PREFIXED = 'prefixed';
 	public const PAGE_NAMESPACE = 'namespace';
+	public const PAGE_DISPLAY_TITLE = 'display_title';
 	public const PAGE_NAMESPACE_TEXT = 'namespace_text';
 	public const PAGE_EXISTS = 'exists';
 	public const PAGE_CONTENT_MODEL = 'content_model';

@@ -14,21 +14,26 @@ class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	protected $language;
 	/** @var \NamespaceInfo */
 	protected $nsInfo;
+	/** @var \PageProps */
+	protected $pageProps;
 
 	/**
 	 * @param ILoadBalancer $lb
 	 * @param \TitleFactory $titleFactory
 	 * @param \Language $language
 	 * @param \NamespaceInfo $nsInfo
+	 * @param \PageProps $pageProps
 	 */
 	public function __construct(
-		ILoadBalancer $lb, \TitleFactory $titleFactory, \Language $language, \NamespaceInfo $nsInfo
+		ILoadBalancer $lb, \TitleFactory $titleFactory, \Language $language,
+		\NamespaceInfo $nsInfo, \PageProps $pageProps
 	) {
 		parent::__construct();
 		$this->lb = $lb;
 		$this->titleFactory = $titleFactory;
 		$this->language = $language;
 		$this->nsInfo = $nsInfo;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
@@ -53,6 +58,6 @@ class Reader extends \MWStake\MediaWiki\Component\DataStore\Reader {
 	 * @return SecondaryDataProvider
 	 */
 	public function makeSecondaryDataProvider() {
-		return new SecondaryDataProvider( $this->titleFactory, $this->language );
+		return new SecondaryDataProvider( $this->titleFactory, $this->language, $this->pageProps );
 	}
 }
