@@ -43,16 +43,13 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 			if ( in_array( $filter->getField(), [ TitleRecord::PAGE_DBKEY, TitleRecord::PAGE_TITLE ] ) ) {
 				$filter->setApplied( true );
 			}
-			if ( $filter->getField() === TitleRecord::PAGE_NAMESPACE_TEXT ) {
-				$id = $this->language->getNsIndex( $filter->getValue() );
-				if ( $id !== false ) {
-					$conds['mti_namespace'] = $id;
-				}
-				$filter->setApplied( true );
-			}
 			if ( $filter->getField() === TitleRecord::PAGE_NAMESPACE ) {
-				if ( !is_array( $filter->getValue() ) ) {
-					$filter->setValue( [ $filter->getValue() ] );
+				if ( !( $filter instanceof Filter\ListValue ) ) {
+					$filter = new Filter\StringValue( [
+						Filter::KEY_FIELD => TitleRecord::PAGE_NAMESPACE,
+						Filter::KEY_VALUE => [ $filter->getValue() ],
+						Filter::KEY_COMPARISON => 'in'
+					] );
 				}
 				$conds[] = 'mti_namespace IN (' . $this->db->makeList( $filter->getValue() ) . ')';
 				$filter->setApplied( true );
@@ -125,6 +122,7 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 			TitleRecord::PAGE_DBKEY => $row->page_title,
 			TitleRecord::PAGE_CONTENT_MODEL => $row->page_content_model,
 			TitleRecord::IS_CONTENT_PAGE => in_array( $row->page_namespace, $this->contentNamespaces ),
+			TitleRecord::PAGE_EXISTS => true,
 		] );
 	}
 

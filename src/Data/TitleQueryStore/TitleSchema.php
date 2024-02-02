@@ -6,8 +6,12 @@ use MWStake\MediaWiki\Component\DataStore\FieldType;
 use MWStake\MediaWiki\Component\DataStore\Schema;
 
 class TitleSchema extends Schema {
-	public function __construct() {
-		parent::__construct( [
+
+	/**
+	 * @param array $fields
+	 */
+	public function __construct( array $fields = [] ) {
+		parent::__construct( array_merge( [
 			TitleRecord::PAGE_ID => [
 				self::FILTERABLE => false,
 				self::SORTABLE => false,
@@ -58,6 +62,6 @@ class TitleSchema extends Schema {
 				self::SORTABLE => true ,
 				self::TYPE => FieldType::BOOLEAN
 			]
-		] );
+		], $fields ) );
 	}
 }
