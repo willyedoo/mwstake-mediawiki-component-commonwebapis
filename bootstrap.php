@@ -4,7 +4,7 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.9' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.10' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 	->register( 'commonwebapis', static function () {
@@ -43,7 +43,6 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 				$updater->addPostDatabaseUpdateMaintenance(
 					\MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance\UpdateTitleIndexDisplayTitle::class
 				);
-
 			} );
 
 			$hookContainer->register( 'UserSaveSettings', [ $userIndexUpdater, 'store' ] );

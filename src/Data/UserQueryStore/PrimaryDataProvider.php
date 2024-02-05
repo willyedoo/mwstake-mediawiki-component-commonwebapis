@@ -96,10 +96,10 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 					// Usernames are stored with spaces in the query table
 					$filterValue = str_replace( '_', ' ', $filter->getValue() );
 					$query = $filterValue;
-				} else if ( $filter->getComparison() === Filter::COMPARISON_EQUALS ) {
+				} elseif ( $filter->getComparison() === Filter::COMPARISON_EQUALS ) {
 					$filterValue = str_replace( ' ', '_', $filter->getValue() );
 					$conds['user_name'] = $filterValue;
-				} else if ( $filter->getComparison() === Filter::COMPARISON_NOT_EQUALS ) {
+				} elseif ( $filter->getComparison() === Filter::COMPARISON_NOT_EQUALS ) {
 					$filterValue = str_replace( ' ', '_', $filter->getValue() );
 					$conds['user_name NOT'] = $filterValue;
 				}

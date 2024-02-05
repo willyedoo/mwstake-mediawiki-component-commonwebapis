@@ -5,7 +5,6 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 use ManualLogEntry;
 use MediaWiki\Hook\AfterImportPageHook;
 use MediaWiki\Hook\PageMoveCompleteHook;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\ArticleUndeleteHook;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\PageIdentity;
@@ -141,7 +140,7 @@ class TitleIndexUpdater implements
 	 * @return string
 	 */
 	private function getDisplayTitle( PageIdentity $page ): string {
-		$display = $this->pageProps->getProperties( $page, 'displaytitle'	);
+		$display = $this->pageProps->getProperties( $page, 'displaytitle' );
 		if ( isset( $display[$page->getId()] ) ) {
 			return mb_strtolower( str_replace( '_', ' ', $display[$page->getId()] ) );
 		}

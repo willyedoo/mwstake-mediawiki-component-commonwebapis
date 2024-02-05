@@ -5,7 +5,6 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleTreeStore;
 use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 use MWStake\MediaWiki\Component\DataStore\Schema;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ResultWrapper;
 
 class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleQueryStore\PrimaryDataProvider {
 	/** @var string|null */
@@ -70,13 +69,39 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 			) {
 				$this->insertParents( $row, $uniqueId, true );
 			} else {
-				// If page is a subpage, but does not match the query, check if we need to insert parent
-				// as a red link (parent doesnt exist)
-				// This only happens when node is not specified (first-level pages)
-				$nonExistingRootParent = $this->parentsNoExist( $row );
-				if ( $nonExistingRootParent ) {
-					$this->insertNonExistingPage( $row, $nonExistingRootParent );
+				if ( !$this->query ) {
+					// If page exists, but its parent doesnt, add it
+					// This only applies if query is not set
+					// We are only checking for root pages, as subpages will be added
+					// by getChildren() method
+					$bits = explode( '/', $row->page_title );
+					$titleToCheck = array_shift( $bits ) . '/dummy';
+					$nonExistingRootParent = $this->getParentIfDoesntExist( $row, $titleToCheck );
+					if ( $nonExistingRootParent ) {
+						$nonExistingNode = $this->getNonExistingRecord( $row, $nonExistingRootParent );
+						$nonExistingUniqueId = $this->getUniqueId( $nonExistingNode );
+						$nonExistingRecord = $this->makeRecord( $nonExistingNode, $uniqueId, false, false );
+						// This is a root node, insert right away
+						$this->data[$nonExistingUniqueId] = $nonExistingRecord;
+					}
+				} else {
+					// If query is set, we need to check if any part of the title matches
+					// the query. If it does, but that page doesnt exist, we need to add it
+					$bits = explode( '/', $row->page_title );
+					while ( count( $bits ) > 0 ) {
+						$titleToCheck = implode( '/', $bits );
+						if ( $this->queryMatchesSubpage( $titleToCheck ) ) {
+							if ( !$this->checkPageExists( $row, $titleToCheck ) ) {
+								// Insert non-existing page that matches the query, and its parents
+								$nonExistingNode = $this->getNonExistingRecord( $row, $titleToCheck );
+								$nonExistingUniqueId = $this->getUniqueId( $nonExistingNode );
+								$this->insertParents( $nonExistingNode, $nonExistingUniqueId, true );
+							}
+						}
+						array_pop( $bits );
+					}
 				}
+
 			}
 			return;
 		}
@@ -138,7 +163,8 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 			return false;
 		}
 		$exploded = explode( '/', $indexTitle );
-		// Get rid of the first element, which is the root page name
+		// Check only if last part matches, ie.
+		// query = 'foo' matches `Bar/foo`, but not `Bar/foo/baz`
 		$last = array_pop( $exploded );
 		return strpos( $last, $this->query ) !== false;
 	}
@@ -226,7 +252,7 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 			$pages[] = $subpageRow;
 		}
 		$pages = $this->insertNonExistingPages( $pages, $row->page_title );
-		usort( $pages, function ( $a, $b ) {
+		usort( $pages, static function ( $a, $b ) {
 			return strcmp( $a->page_title, $b->page_title );
 		} );
 
@@ -304,30 +330,39 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 
 	/**
 	 * @param \stdClass $row
+	 * @param string $title
 	 *
 	 * @return string|null
 	 */
-	private function parentsNoExist( \stdClass $row ): ?string {
-		$title = $row->page_title;
+	private function getParentIfDoesntExist( \stdClass $row, string $title ): ?string {
 		$bits = explode( '/', $title );
 		if ( count( $bits ) === 1 ) {
 			// Short-circuit
 			return false;
 		}
-		$rootParent = array_shift( $bits );
-		$exists = $this->db->selectRow(
+		array_pop( $bits );
+		$parent = implode( '/', $bits );
+		if ( !$this->checkPageExists( $row, $parent ) ) {
+			return $parent;
+		}
+		return null;
+	}
+
+	/**
+	 * @param \stdClass $row
+	 * @param string $title
+	 *
+	 * @return bool
+	 */
+	private function checkPageExists( \stdClass $row, string $title ): bool {
+		return (bool)$this->db->selectRow(
 			'page',
 			[ 'page_title' ],
 			[
 				'page_namespace' => $row->page_namespace,
-				'page_title' => $rootParent
+				'page_title' => $title
 			],
 		);
-
-		if ( !$exists ) {
-			return $rootParent;
-		}
-		return null;
 	}
 
 	/**
@@ -338,9 +373,9 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 	 */
 	private function insertNonExistingPages( array $res, string $parentNode ): array {
 		foreach ( $res as $row ) {
-			$nonExistingPage = $this->getNonExistingChildOd( $row->page_title, $parentNode, (int) $row->page_namespace );
+			$nonExistingPage = $this->getNonExistingChildOf( $row->page_title, $parentNode, (int)$row->page_namespace );
 			if ( $nonExistingPage ) {
-				$res[] = (object) [
+				$res[] = (object)[
 					'page_title' => $nonExistingPage,
 					'page_namespace' => $row->page_namespace
 				];
@@ -357,7 +392,7 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 	 *
 	 * @return mixed|null
 	 */
-	private function getNonExistingChildOd( string $child, string $parent, int $namespace ): ?string {
+	private function getNonExistingChildOf( string $child, string $parent, int $namespace ): ?string {
 		$regex = '/^' . preg_quote( $parent, '/' ) . '+\/[^\/]+(?=\/|$)/';
 		$matches = [];
 		preg_match( $regex, $child, $matches );
@@ -377,19 +412,18 @@ class PrimaryDataProvider extends \MWStake\MediaWiki\Component\CommonWebAPIs\Dat
 			return $matches[0];
 		}
 		return null;
-
 	}
 
 	/**
 	 * @param \stdClass $row
 	 * @param string $nonExistingPageName
 	 *
-	 * @return void
+	 * @return \stdClass
 	 */
-	private function insertNonExistingPage( \stdClass $row, string $nonExistingPageName ) {
+	private function getNonExistingRecord( \stdClass $row, string $nonExistingPageName ) {
 		$nonExistingNode = clone $row;
 		$nonExistingNode->page_title = $nonExistingPageName;
-		$uniqueId = $this->getUniqueId( $nonExistingNode );
-		$this->data[$uniqueId] = $this->makeRecord( $nonExistingNode, $uniqueId, false, false );
+
+		return $nonExistingNode;
 	}
 }

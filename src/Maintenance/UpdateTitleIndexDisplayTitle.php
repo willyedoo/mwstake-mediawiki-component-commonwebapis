@@ -38,7 +38,7 @@ class UpdateTitleIndexDisplayTitle extends \LoggedUpdateMaintenance {
 			}
 			$cnt++;
 		}
-		if ( !empty( $toUpdate ) ) {
+		if ( !empty( $toUpdate['values'] ) ) {
 			$this->updateBatch( $toUpdate );
 		}
 
@@ -59,7 +59,6 @@ class UpdateTitleIndexDisplayTitle extends \LoggedUpdateMaintenance {
 			__METHOD__,
 			[ 'IGNORE' ]
 		);
-		error_log( $db->lastQuery() );
 	}
 
 	/**

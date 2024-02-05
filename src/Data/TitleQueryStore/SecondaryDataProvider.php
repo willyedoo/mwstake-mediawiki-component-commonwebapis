@@ -2,7 +2,6 @@
 
 namespace MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleQueryStore;
 
-use MediaWiki\MediaWikiServices;
 use MWStake\MediaWiki\Component\DataStore\ISecondaryDataProvider;
 use MWStake\MediaWiki\Component\DataStore\Record;
 use Title;
@@ -73,6 +72,9 @@ class SecondaryDataProvider implements ISecondaryDataProvider {
 	 * @return string
 	 */
 	protected function getDisplayTitle( Title $title ) {
+		if ( !$title->exists() || !$title->canExist() ) {
+			return '';
+		}
 		$display = $this->pageProps->getProperties( $title, 'displaytitle' );
 		if ( isset( $display[$title->getId()] ) ) {
 			return mb_strtolower( str_replace( '_', ' ', $display[$title->getId()] ) );
