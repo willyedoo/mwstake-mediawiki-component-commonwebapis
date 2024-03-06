@@ -17,13 +17,15 @@ class FileQueryStore extends QueryStore {
 	 * @param \TitleFactory $titleFactory
 	 * @param \Language $language
 	 * @param \NamespaceInfo $nsInfo
+	 * @param \PageProps $pageProps
+	 * @param \RepoGroup $repoGroup
 	 */
 	public function __construct(
 		HookContainer $hookContainer, ILoadBalancer $lb, \TitleFactory $titleFactory,
-		\Language $language, \NamespaceInfo $nsInfo
+		\Language $language, \NamespaceInfo $nsInfo, \PageProps $pageProps, \RepoGroup $repoGroup
 	) {
 		parent::__construct( $hookContainer );
-		$this->store = new Store( $lb, $titleFactory, $language, $nsInfo );
+		$this->store = new Store( $lb, $titleFactory, $language, $nsInfo, $pageProps, $repoGroup );
 	}
 
 	/**

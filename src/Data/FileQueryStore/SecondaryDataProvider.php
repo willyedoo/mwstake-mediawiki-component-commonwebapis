@@ -8,6 +8,31 @@ use MWStake\MediaWiki\Component\CommonWebAPIs\Data\TitleQueryStore\TitleRecord;
 
 class SecondaryDataProvider extends TitleSecondaryDataProvider {
 
+	/** @var \TitleFactory */
+	protected $titleFactory;
+	/** @var \Language */
+	protected $language;
+	/** @var \PageProps */
+	protected $pageProps;
+	/** @var \RepoGroup */
+	protected $repoGroup;
+	/** @var \RequestContext|null */
+	protected $context;
+
+	/**
+	 * @param \TitleFactory $titleFactory
+	 * @param \Language $language
+	 * @param \PageProps $pageProp
+	 * @param \RepoGroup $repoGroup
+	 */
+	public function __construct( $titleFactory, \Language $language, \PageProps $pageProps, \RepoGroup $repoGroup ) {
+		$this->titleFactory = $titleFactory;
+		$this->language = $language;
+		$this->pageProps = $pageProps;
+		$this->repoGroup = $repoGroup;
+		$this->context = \RequestContext::getMain();
+	}
+
 	/**
 	 * @param array $dataSets
 	 *
@@ -18,6 +43,21 @@ class SecondaryDataProvider extends TitleSecondaryDataProvider {
 		foreach ( $dataSets as $dataSet ) {
 			$title = $this->titleFromRecord( $dataSet );
 			$dataSet->set( TitleRecord::PAGE_PREFIXED, $title->getText() );
+
+			$timestamp = $dataSet->get( FileRecord::FILE_TIMESTAMP );
+			$dataSet->set(
+				FileRecord::FILE_TIMESTAMP_FORMATTED,
+				$this->context->getLanguage()->userDate( $timestamp, $this->context->getUser() )
+			);
+			$dataSet->set(
+				FileRecord::FILE_SIZE,
+				$this->context->getLanguage()->formatSize( $dataSet->get( FileRecord::FILE_SIZE ) )
+			);
+			$file = $this->repoGroup->getLocalRepo()->newFile( $title );
+			$dataSet->set(
+				FileRecord::FILE_THUMBNAIL_URL,
+				$file->createThumb( 40 )
+			);
 		}
 
 		return $dataSets;
