@@ -57,6 +57,11 @@ class FileSchema extends TitleSchema {
 				self::FILTERABLE => false,
 				self::SORTABLE => false,
 				self::TYPE => FieldType::STRING
+			],
+			FileRecord::FILE_THUMBNAIL_URL_PREVIEW => [
+				self::FILTERABLE => false,
+				self::SORTABLE => false,
+				self::TYPE => FieldType::STRING
 			]
 		] );
 	}

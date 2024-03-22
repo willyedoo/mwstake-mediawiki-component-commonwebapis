@@ -15,4 +15,5 @@ class FileRecord extends TitleRecord {
 	public const FILE_COMMENT = 'comment';
 	public const FILE_CATEGORIES = 'categories';
 	public const FILE_THUMBNAIL_URL = 'thumb_url';
+	public const FILE_THUMBNAIL_URL_PREVIEW = 'preview_url';
 }
