@@ -139,7 +139,6 @@ class CategoryIndexUpdater implements
 	 * @return array
 	 */
 	private function getCategoryInfo( PageIdentity $page ): array {
-		error_log( "GCI" );
 		$dbr = $this->lb->getConnection( DB_REPLICA );
 		$catRow = $dbr->selectRow(
 			'category',
@@ -163,9 +162,6 @@ class CategoryIndexUpdater implements
 	 */
 	private function insert( array $info ) {
 		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
-		error_log( var_export( $info, 1 ) );
 		$dbw->insert( 'mws_category_index', $info, __METHOD__, [ 'IGNORE' ] );
-		error_log( $dbw->lastQuery() );
-		error_log( $dbw->lastError() );
 	}
 }

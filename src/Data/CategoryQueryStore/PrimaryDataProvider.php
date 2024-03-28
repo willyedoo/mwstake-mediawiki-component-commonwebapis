@@ -40,7 +40,7 @@ class PrimaryDataProvider extends TitlePrimaryProvider {
 		$query = $params->getQuery();
 		$conds = [ 'mci_page_title = cat_title' ];
 		if ( $query ) {
-			$query = mb_strtolower( str_replace( ' ', '_', $query ) );
+			$query = mb_strtolower( str_replace( '_', ' ', $query ) );
 			$conds[] = 'mci_title' . $this->db->buildLike(
 					$this->db->anyString(), $query, $this->db->anyString()
 				);
