@@ -4,7 +4,7 @@ if ( defined( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION' ) ) {
 	return;
 }
 
-define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.15' );
+define( 'MWSTAKE_MEDIAWIKI_COMPONENT_COMMONWEBAPIS_VERSION', '2.0.16' );
 
 MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 	->register( 'commonwebapis', static function () {
@@ -21,6 +21,9 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			$hookContainer = \MediaWiki\MediaWikiServices::getInstance()->getHookContainer();
 
 			$hookContainer->register( 'LoadExtensionSchemaUpdates', static function ( $updater ) {
+				if ( !$updater instanceof DatabaseUpdater ) {
+					throw new \MWException( "LoadExtensionSchemaUpdates hook must be called with a DatabaseUpdater" );
+				}
 				$updater->addExtensionTable(
 					'mws_user_index',
 					__DIR__ . "/sql/mws_user_index.sql"
@@ -37,6 +40,12 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 				$updater->addExtensionTable(
 					'mws_category_index',
 					__DIR__ . "/sql/mws_category_index.sql"
+				);
+
+				$updater->addExtensionField(
+					'mws_category_index',
+					'mci_page_title',
+					__DIR__ . "/sql/mws_category_index_patch_page_title.sql"
 				);
 
 				$updater->addPostDatabaseUpdateMaintenance(
@@ -56,10 +65,15 @@ MWStake\MediaWiki\ComponentLoader\Bootstrapper::getInstance()
 			$hookContainer->register( 'UserSaveSettings', [ $userIndexUpdater, 'store' ] );
 
 			$hookContainer->register( 'PageSaveComplete', [ $titleIndexUpdater, 'onPageSaveComplete' ] );
+			$hookContainer->register( 'PageSaveComplete', [ $categoryIndexUpdater, 'onPageSaveComplete' ] );
 			$hookContainer->register( 'PageMoveComplete', [ $titleIndexUpdater, 'onPageMoveComplete' ] );
+			$hookContainer->register( 'PageMoveComplete', [ $categoryIndexUpdater, 'onPageMoveComplete' ] );
 			$hookContainer->register( 'PageDeleteComplete', [ $titleIndexUpdater, 'onPageDeleteComplete' ] );
+			$hookContainer->register( 'PageDeleteComplete', [ $categoryIndexUpdater, 'onPageDeleteComplete' ] );
 			$hookContainer->register( 'ArticleUndelete', [ $titleIndexUpdater, 'onArticleUndelete' ] );
+			$hookContainer->register( 'ArticleUndelete', [ $categoryIndexUpdater, 'onArticleUndelete' ] );
 			$hookContainer->register( 'AfterImportPage', [ $titleIndexUpdater, 'onAfterImportPage' ] );
+			$hookContainer->register( 'AfterImportPage', [ $categoryIndexUpdater, 'onAfterImportPage' ] );
 			$hookContainer->register( 'CategoryAfterPageAdded', [ $categoryIndexUpdater, 'onCategoryAfterPageAdded' ] );
 			$hookContainer->register(
 				'CategoryAfterPageRemoved', [ $categoryIndexUpdater, 'onCategoryAfterPageRemoved' ]

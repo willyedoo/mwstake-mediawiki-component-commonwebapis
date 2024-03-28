@@ -38,7 +38,7 @@ class PrimaryDataProvider extends TitlePrimaryProvider {
 	 */
 	protected function makePreFilterConds( ReaderParams $params ) {
 		$query = $params->getQuery();
-		$conds = [ 'mci_cat_id = cat_id' ];
+		$conds = [ 'mci_page_title = cat_title' ];
 		if ( $query ) {
 			$query = mb_strtolower( str_replace( ' ', '_', $query ) );
 			$conds[] = 'mci_title' . $this->db->buildLike(
