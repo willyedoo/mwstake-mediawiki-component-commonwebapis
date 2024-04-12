@@ -29,6 +29,7 @@ class PopulateCategoryIndex extends LoggedUpdateMaintenance {
 			$toInsert[] = [
 				'mci_cat_id' => $link->cat_id,
 				'mci_title' => mb_strtolower( str_replace( '_', ' ', $link->cat_title ) ),
+				'mci_page_title' => $link->cat_title,
 				'mci_count' => $link->cat_pages
 			];
 			if ( $cnt % $batch === 0 ) {
@@ -63,6 +64,6 @@ class PopulateCategoryIndex extends LoggedUpdateMaintenance {
 	 * @return string
 	 */
 	protected function getUpdateKey() {
-		return 'mws-category-index-init';
+		return 'mws-category-index-init-with-page-title';
 	}
 }

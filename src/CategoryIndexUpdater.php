@@ -3,11 +3,29 @@
 namespace MWStake\MediaWiki\Component\CommonWebAPIs;
 
 use Category;
+use ManualLogEntry;
+use MediaWiki\Hook\AfterImportPageHook;
+use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\Page\Hook\ArticleUndeleteHook;
 use MediaWiki\Page\Hook\CategoryAfterPageAddedHook;
 use MediaWiki\Page\Hook\CategoryAfterPageRemovedHook;
+use MediaWiki\Page\Hook\PageDeleteCompleteHook;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Permissions\Authority;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Storage\Hook\PageSaveCompleteHook;
 use Wikimedia\Rdbms\ILoadBalancer;
 
-class CategoryIndexUpdater implements CategoryAfterPageAddedHook, CategoryAfterPageRemovedHook {
+class CategoryIndexUpdater implements
+	CategoryAfterPageAddedHook,
+	CategoryAfterPageRemovedHook,
+	PageSaveCompleteHook,
+	PageMoveCompleteHook,
+	PageDeleteCompleteHook,
+	ArticleUndeleteHook,
+	AfterImportPageHook
+{
 
 	/**
 	 * @var ILoadBalancer
@@ -36,16 +54,73 @@ class CategoryIndexUpdater implements CategoryAfterPageAddedHook, CategoryAfterP
 	}
 
 	/**
+	 * @inheritDoc
+	 */
+	public function onAfterImportPage( $title, $foreignTitle, $revCount, $sRevCount, $pageInfo ) {
+		if ( $title->getNamespace() === NS_CATEGORY ) {
+			$this->updateForPage( $title );
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onArticleUndelete( $title, $create, $comment, $oldPageId, $restoredPages ) {
+		if ( $title->getNamespace() === NS_CATEGORY ) {
+			$this->updateForPage( $title );
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onPageDeleteComplete(
+		ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID,
+		RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount
+	) {
+		if ( $page->getNamespace() === NS_CATEGORY ) {
+			$this->delete( $page->getDBkey() );
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onPageMoveComplete( $old, $new, $user, $pageid, $redirid, $reason, $revision ) {
+		if ( $old->getNamespace() === NS_CATEGORY ) {
+			$this->delete( $old->getDBkey() );
+		}
+		if ( $new->getNamespace() === NS_CATEGORY ) {
+			$this->updateForPage( $new );
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onPageSaveComplete( $wikiPage, $user, $summary, $flags, $revisionRecord, $editResult ) {
+		if ( $wikiPage->getTitle()->getNamespace() === NS_CATEGORY ) {
+			$this->updateForPage( $wikiPage->getTitle() );
+		}
+	}
+
+	/**
 	 * @param Category $category
 	 * @return void
 	 */
 	private function updateForCategory( Category $category ) {
-		$categoryKey = $category->getPage()->getDBkey();
+		$this->updateForPage( $category->getPage() );
+	}
+
+	/**
+	 * @param PageIdentity $page
+	 * @return void
+	 */
+	private function updateForPage( PageIdentity $page ) {
+		$categoryKey = $page->getDBkey();
 		$this->delete( $categoryKey );
-		$info = $this->getCategoryInfo( $categoryKey );
-		if ( $info ) {
-			$this->insert( $info );
-		}
+		$info = $this->getCategoryInfo( $page );
+		$this->insert( $info );
 	}
 
 	/**
@@ -54,30 +129,31 @@ class CategoryIndexUpdater implements CategoryAfterPageAddedHook, CategoryAfterP
 	 */
 	private function delete( string $categoryKey ) {
 		$dbw = $this->lb->getConnection( DB_PRIMARY );
-		$dbw->delete( 'mws_category_index', [ 'mci_title' => $categoryKey ] );
+		$dbw->delete( 'mws_category_index', [
+			'mci_title' => mb_strtolower( str_replace( '_', ' ', $categoryKey ) )
+		] );
 	}
 
 	/**
-	 * @param string $categoryKey
-	 * @return array|null
+	 * @param PageIdentity $page
+	 * @return array
 	 */
-	private function getCategoryInfo( string $categoryKey ): ?array {
+	private function getCategoryInfo( PageIdentity $page ): array {
 		$dbr = $this->lb->getConnection( DB_REPLICA );
-		$row = $dbr->selectRow(
+		$catRow = $dbr->selectRow(
 			'category',
 			[ 'cat_id', 'cat_pages' ],
-			[ 'cat_title' => $categoryKey ],
+			[ 'cat_title' => $page->getDBkey() ],
 			__METHOD__
 		);
-
-		if ( $row ) {
-			return [
-				'mci_cat_id' => $row->cat_id,
-				'mci_title' => mb_strtolower( str_replace( '_', ' ', $categoryKey ) ),
-				'mci_count' => $row->cat_pages
-			];
-		}
-		return null;
+		$pageCount = $catRow ? (int)$catRow->cat_pages : 0;
+		$catId = $catRow ? (int)$catRow->cat_id : 0;
+		return [
+			'mci_cat_id' => $catId,
+			'mci_title' => mb_strtolower( str_replace( '_', ' ', $page->getDBkey() ) ),
+			'mci_page_title' => $page->getDBkey(),
+			'mci_count' => $pageCount
+		];
 	}
 
 	/**
@@ -86,7 +162,6 @@ class CategoryIndexUpdater implements CategoryAfterPageAddedHook, CategoryAfterP
 	 */
 	private function insert( array $info ) {
 		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
-		$dbw->insert( 'mws_category_index', $info );
+		$dbw->insert( 'mws_category_index', $info, __METHOD__, [ 'IGNORE' ] );
 	}
-
 }
