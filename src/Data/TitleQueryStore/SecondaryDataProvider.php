@@ -78,7 +78,7 @@ class SecondaryDataProvider implements ISecondaryDataProvider {
 		}
 		$display = $this->pageProps->getProperties( $title, 'displaytitle' );
 		if ( isset( $display[$title->getId()] ) ) {
-			return mb_strtolower( str_replace( '_', ' ', $display[$title->getId()] ) );
+			return str_replace( '_', ' ', $display[$title->getId()] );
 		}
 		return '';
 	}
