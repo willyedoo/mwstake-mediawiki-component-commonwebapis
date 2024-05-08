@@ -18,11 +18,6 @@ class FileSchema extends TitleSchema {
 				self::SORTABLE => true ,
 				self::TYPE => FieldType::STRING
 			],
-			FileRecord::MIME_MINOR => [
-				self::FILTERABLE => true,
-				self::SORTABLE => true ,
-				self::TYPE => FieldType::STRING
-			],
 			FileRecord::FILE_SIZE => [
 				self::FILTERABLE => true,
 				self::SORTABLE => true ,
