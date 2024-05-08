@@ -43,17 +43,21 @@ class SecondaryDataProvider extends TitleSecondaryDataProvider {
 		foreach ( $dataSets as $dataSet ) {
 			$title = $this->titleFromRecord( $dataSet );
 			$dataSet->set( TitleRecord::PAGE_PREFIXED, $title->getText() );
+			$file = $this->repoGroup->getLocalRepo()->newFile( $title );
 
-			$timestamp = $dataSet->get( FileRecord::FILE_TIMESTAMP );
+			$timestamp = $file->getTimestamp();
+			$dataSet->set(
+				FileRecord::FILE_TIMESTAMP,
+				$timestamp
+			);
 			$dataSet->set(
 				FileRecord::FILE_TIMESTAMP_FORMATTED,
 				$this->context->getLanguage()->userDate( $timestamp, $this->context->getUser() )
 			);
 			$dataSet->set(
 				FileRecord::FILE_SIZE,
-				$this->context->getLanguage()->formatSize( $dataSet->get( FileRecord::FILE_SIZE ) )
+				$this->context->getLanguage()->formatSize( $file->getSize() )
 			);
-			$file = $this->repoGroup->getLocalRepo()->newFile( $title );
 			$dataSet->set(
 				FileRecord::FILE_THUMBNAIL_URL,
 				$file->createThumb( 40 )
@@ -61,6 +65,19 @@ class SecondaryDataProvider extends TitleSecondaryDataProvider {
 			$dataSet->set(
 				FileRecord::FILE_THUMBNAIL_URL_PREVIEW,
 				$file->createThumb( 120 )
+			);
+			$dataSet->set(
+				FileRecord::FILE_EXTENSION,
+				$file->getExtension()
+			);
+			$dataSet->set(
+				FileRecord::MIME_MAJOR,
+				$file->getMimeType()
+			);
+			$actorId = $dataSet->get( FileRecord::FILE_AUTHOR_ID );
+			$dataSet->set(
+				FileRecord::FILE_AUTHOR_NAME,
+				\MediaWiki\MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $actorId )->getName()
 			);
 		}
 

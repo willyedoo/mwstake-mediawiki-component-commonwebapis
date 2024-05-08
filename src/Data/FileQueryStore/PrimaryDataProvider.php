@@ -37,8 +37,7 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 	 * @inheritDoc
 	 */
 	protected function getFields() {
-		return array_merge( parent::getFields(), [ 'img_size', 'img_major_mime', 'img_minor_mime',
-			'img_actor', 'img_timestamp', 'img_description_id', 'comment_text', "GROUP_CONCAT( cl_to SEPARATOR '|') categories" ] );
+		return array_merge( parent::getFields(), [ 'img_actor', 'comment_text', "GROUP_CONCAT( cl_to SEPARATOR '|') categories" ] );
 	}
 
 	/**
@@ -65,12 +64,7 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 			TitleRecord::PAGE_DBKEY => $row->page_title,
 			TitleRecord::PAGE_CONTENT_MODEL => $row->page_content_model,
 			TitleRecord::IS_CONTENT_PAGE => in_array( $row->page_namespace, $this->contentNamespaces ),
-			FileRecord::FILE_EXTENSION => $this->getExtension( $row->page_title ),
-			FileRecord::FILE_SIZE => (int)$row->img_size,
-			FileRecord::MIME_MAJOR => $row->img_major_mime,
-			FileRecord::MIME_MINOR => $row->img_minor_mime,
-			FileRecord::FILE_AUTHOR_NAME => \MediaWiki\MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $row->img_actor )->getName(),
-			FileRecord::FILE_TIMESTAMP => $row->img_timestamp,
+			FileRecord::FILE_AUTHOR_ID => $row->img_actor,
 			FileRecord::FILE_COMMENT => $row->comment_text,
 			FileRecord::FILE_CATEGORIES =>  $row->categories
 		] );
@@ -109,15 +103,5 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 	 */
 	protected function getDefaultOptions() {
 		return [ 'GROUP BY' => 'page_id' ];
-	}
-
-	/**
-	 * @param string $title
-	 *
-	 * @return string
-	 */
-	private function getExtension( string $title ): string {
-		$bits = explode( '.', $title );
-		return strtolower( array_pop( $bits ) );
 	}
 }
