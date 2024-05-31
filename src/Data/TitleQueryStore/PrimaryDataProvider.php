@@ -43,10 +43,14 @@ class PrimaryDataProvider extends PrimaryDatabaseDataProvider {
 			if (
 				in_array( $filter->getField(), [
 					TitleRecord::PAGE_DBKEY, TitleRecord::PAGE_DISPLAY_TITLE, TitleRecord::PAGE_TITLE
-				] ) ) {
+				] )
+			) {
 				$filter->setApplied( true );
+				if ( !$query && $filter->getComparison() === Filter::COMPARISON_CONTAINS ) {
+					$query = $filter->getValue();
+				}
 			}
-			if ( $filter->getField() === TitleRecord::PAGE_NAMESPACE ) {
+ 			if ( $filter->getField() === TitleRecord::PAGE_NAMESPACE ) {
 				if ( !( $filter instanceof Filter\ListValue ) ) {
 					$filter = new Filter\StringValue( [
 						Filter::KEY_FIELD => TitleRecord::PAGE_NAMESPACE,

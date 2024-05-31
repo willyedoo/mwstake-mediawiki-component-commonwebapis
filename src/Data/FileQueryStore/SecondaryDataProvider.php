@@ -45,14 +45,9 @@ class SecondaryDataProvider extends TitleSecondaryDataProvider {
 			$dataSet->set( TitleRecord::PAGE_PREFIXED, $title->getText() );
 			$file = $this->repoGroup->getLocalRepo()->newFile( $title );
 
-			$timestamp = $file->getTimestamp();
-			$dataSet->set(
-				FileRecord::FILE_TIMESTAMP,
-				$timestamp
-			);
 			$dataSet->set(
 				FileRecord::FILE_TIMESTAMP_FORMATTED,
-				$this->context->getLanguage()->userDate( $timestamp, $this->context->getUser() )
+				$this->context->getLanguage()->userDate( $file->getTimestamp(), $this->context->getUser() )
 			);
 			$dataSet->set(
 				FileRecord::FILE_SIZE,
@@ -65,11 +60,6 @@ class SecondaryDataProvider extends TitleSecondaryDataProvider {
 			$dataSet->set(
 				FileRecord::FILE_THUMBNAIL_URL_PREVIEW,
 				$file->createThumb( 120 )
-			);
-			$actorId = $dataSet->get( FileRecord::FILE_AUTHOR_ID );
-			$dataSet->set(
-				FileRecord::FILE_AUTHOR_NAME,
-				\MediaWiki\MediaWikiServices::getInstance()->getUserFactory()->newFromActorId( $actorId )->getName()
 			);
 		}
 
