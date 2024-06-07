@@ -20,6 +20,21 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 		$conds = parent::makePreFilterConds( $params );
 		$conds[] = 'mti_namespace = ' . NS_FILE;
 		foreach ( $filters as $filter ) {
+			if ( $filter->getField() === 'namespace_text' ) {
+				$filterValue = $filter->getValue();
+				if ( !is_array( $filterValue ) ) {
+					$filterValue = [ $filterValue ];
+				}
+				$nsConds = [];
+				foreach ( $filterValue as $value ) {
+					// Special case for NSFR:
+					// Filtering by namespace is a bit tricky, as NSFR stores namespaces as part of title
+					$value = mb_strtolower( str_replace( '_', ' ', $value ) );
+					$nsConds[] = 'mti_title LIKE "' . $value . ':%"';
+				}
+				$conds[] = implode( ' OR ', $nsConds );
+				$filter->setApplied( true );
+			}
 			if ( $filter->getField() === FileRecord::FILE_EXTENSION ) {
 				$extensions = $filter->getValue();
 				if ( !is_array( $extensions ) ) {
@@ -30,7 +45,6 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 				}, $extensions ), LIST_OR );
 				$filter->setApplied( true );
 			}
-
 		}
 		return $conds;
 	}
