@@ -10,6 +10,10 @@ use MWStake\MediaWiki\Component\DataStore\ReaderParams;
 
 class PrimaryDataProvider extends TitlePrimaryDataProvider {
 
+	private $dbFieldMapping = [
+		'timestamp' => 'img_timestamp'
+	];
+
 	/**
 	 * @param ReaderParams $params
 	 *
@@ -180,7 +184,34 @@ class PrimaryDataProvider extends TitlePrimaryDataProvider {
 		] );
 	}
 
-		/**
+	/**
+	 * @param ReaderParams $params
+	 * @return array|string[]
+	 */
+	protected function makePreOptionConds( ReaderParams $params ) {
+		$conds = $this->getDefaultOptions();
+
+		$fields = array_values( $this->schema->getSortableFields() );
+
+		foreach ( $params->getSort() as $sort ) {
+			if ( !in_array( $sort->getProperty(), $fields ) ) {
+				continue;
+			}
+			if ( !isset( $conds['ORDER BY'] ) ) {
+				$conds['ORDER BY'] = "";
+			} else {
+				$conds['ORDER BY'] .= ",";
+			}
+			$property = $sort->getProperty();
+			if ( isset( $this->dbFieldMapping[$property] ) ) {
+				$property = $this->dbFieldMapping[$property];
+			}
+			$conds['ORDER BY'] .= "$property {$sort->getDirection()}";
+		}
+		return $conds;
+	}
+
+	/**
 	 *
 	 * @return array
 	 */
