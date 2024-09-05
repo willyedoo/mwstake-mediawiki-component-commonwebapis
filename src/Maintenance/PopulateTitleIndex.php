@@ -10,7 +10,11 @@ class PopulateTitleIndex extends \Maintenance {
 	 */
 	public function execute() {
 		$db = $this->getDB( DB_REPLICA );
-		$db->query( 'TRUNCATE TABLE mws_title_index' );
+
+		if ( $db->tableExists( 'mws_title_index' ) ) {
+			// Truncate first, if exists
+			$db->delete( 'mws_title_index', '*', __METHOD__ );
+		}
 
 		$titles = $db->select(
 			[ 'p' => 'page', 'pp' => 'page_props' ],

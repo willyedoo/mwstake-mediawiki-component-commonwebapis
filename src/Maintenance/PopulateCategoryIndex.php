@@ -4,11 +4,11 @@ namespace MWStake\MediaWiki\Component\CommonWebAPIs\Maintenance;
 
 use LoggedUpdateMaintenance;
 
-class PopulateCategoryIndex extends LoggedUpdateMaintenance {
+class PopulateCategoryIndex extends \Maintenance {
 	/**
 	 * @return bool
 	 */
-	protected function doDBUpdates() {
+	public function execute() {
 		$db = $this->getDB( DB_REPLICA );
 
 		if ( $db->tableExists( 'mws_category_index' ) ) {
@@ -58,12 +58,5 @@ class PopulateCategoryIndex extends LoggedUpdateMaintenance {
 			__METHOD__,
 			[ 'IGNORE' ]
 		);
-	}
-
-	/**
-	 * @return string
-	 */
-	protected function getUpdateKey() {
-		return 'mws-category-index-init-with-page-title';
 	}
 }
