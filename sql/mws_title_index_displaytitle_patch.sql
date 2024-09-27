@@ -1,1 +1,2 @@
-ALTER TABLE /*$wgDBprefix*/mws_title_index ADD mti_displaytitle varchar(255) binary NOT NULL;
+ALTER TABLE /*$wgDBprefix*/mws_title_index 
+ADD COLUMN mti_displaytitle VARCHAR(255) NOT NULL;
